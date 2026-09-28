@@ -365,7 +365,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 <span style="display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:18px;background:#16a34a;color:#ffffff;font-size:30px;box-shadow:0 6px 18px rgba(34,197,94,.18)">
 ⚡
 </span>
-<span>WAAREE EPC TICKET MANAGER — V2</span>
+<span>EPC PROJECT TICKET MANAGER — V2</span>
 </h1>
     <p>
       Ticket-based Engineering & EPC Work Planner • made by Akshay J Solanki
@@ -612,9 +612,9 @@ const el = {
 
 const SCHEMA_VERSION = 3;
 const STORAGE = {projects:'plannerProjects',tasks:'plannerTasks',meetings:'plannerMeetings',meta:'plannerMeta'};
-const defaultProjects=['General','Hydrogen Plant','Procurement','Client Review'];
+const defaultProjects=['General','Process Plant Package A','Procurement','Client Review'];
 const defaultTasks=[{
-  id:1,title:'Review hydrogen piping comments',project:'Hydrogen Plant',discipline:'Piping',
+  id:1,title:'Review piping isometric comments',project:'Process Plant Package A',discipline:'Piping',
   owner:'',accountable:'',support:'Process',consulted:'',informed:'',
   urgency:'Urgent',importance:'High',priority:'Urgent',status:'In Progress',
   category:'Engineering Action',assigned:'2026-05-19',due:'2026-05-25',

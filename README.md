@@ -50,24 +50,24 @@ In modern engineering and corporate environments, everyday tasks—such as strip
 ## 🚀 Tool Inventory & Capabilities
 
 ```
-┌───────────────────────────────┬──────────────────────┬──────────────────────────────────────────────────┬─────────────────┐
-│ Tool Artifact                 │ Discipline / Domain  │ Primary Capability                               │ Network Traffic │
-├───────────────────────────────┼──────────────────────┼──────────────────────────────────────────────────┼─────────────────┤
-│ EPC_PROJECT_TICKET.HTML       │ Project Management   │ Eisenhower Matrix, RACI tracking, CSV/JSON sync  │ 0 KB (None)     │
-│ .Vendor_Package_Register.html │ Vendor Engineering   │ Doc review milestones, register & Excel export   │ 0 KB (None)     │
-│ .Digital Signature.html       │ Office Admin / Docs  │ Smooth bezier hand-drawn & 30 typography styles  │ 0 KB (None)     │
-│ .pdf_annotation_cleaner.html  │ Document Control     │ Strips review markup/comments via client pdf-lib │ 0 KB (None)     │
-│ .pdf_merge_rotate.html        │ Document Control     │ Offline merge, rotate, page extract & bundle     │ 0 KB (None)     │
-│ .LINEAR INTERPOLATION.html    │ Engineering / Piping │ Instant 1D/2D table interpolation & math steps   │ 0 KB (None)     │
-│ .Case_Converter.html          │ CAD / Code / Docs    │ 8-mode case conversion (UPPER, snake, camel...)  │ 0 KB (None)     │
-└───────────────────────────────┴──────────────────────┴──────────────────────────────────────────────────┴─────────────────┘
+┌──────────────────────────────┬──────────────────────┬──────────────────────────────────────────────────┬─────────────────┐
+│ Tool Artifact                │ Discipline / Domain  │ Primary Capability                               │ Network Traffic │
+├──────────────────────────────┼──────────────────────┼──────────────────────────────────────────────────┼─────────────────┤
+│ EPC_Project_Ticket.html      │ Project Management   │ Eisenhower Matrix, RACI tracking, CSV/JSON sync  │ 0 KB (None)     │
+│ Vendor_Package_Register.html │ Vendor Engineering   │ Doc review milestones, register & Excel export   │ 0 KB (None)     │
+│ Digital_Signature.html       │ Office Admin / Docs  │ Smooth bezier hand-drawn & 30 typography styles  │ 0 KB (None)     │
+│ PDF_Annotation_Cleaner.html  │ Document Control     │ Strips review markup/comments via client pdf-lib │ 0 KB (None)     │
+│ PDF_Merge_Rotate.html        │ Document Control     │ Offline merge, rotate, page extract & bundle     │ 0 KB (None)     │
+│ Linear_Interpolation.html    │ Engineering / Piping │ Instant 1D/2D table interpolation & math steps   │ 0 KB (None)     │
+│ Case_Converter.html          │ CAD / Code / Docs    │ 8-mode case conversion (UPPER, snake, camel...)  │ 0 KB (None)     │
+└──────────────────────────────┴──────────────────────┴──────────────────────────────────────────────────┴─────────────────┘
 ```
 
 ---
 
 ## 📦 Detailed Tool Walkthrough
 
-### 1. 🎫 EPC Project Ticket Manager V2 (`EPC_PROJECT_TICKET.HTML`)
+### 1. 🎫 EPC Project Ticket Manager V2 (`EPC_Project_Ticket.html`)
 A complete engineering project management and ticket triage dashboard designed specifically for multi-discipline EPC (Engineering, Procurement, and Construction) workflows.
 
 - **Eisenhower Priority Matrix:** Visual drag-and-drop 4-quadrant prioritization based on Urgency vs. Importance.
@@ -78,7 +78,7 @@ A complete engineering project management and ticket triage dashboard designed s
 
 ---
 
-### 2. 📋 Vendor Package Register (`.Vendor_Package_Register.html`)
+### 2. 📋 Vendor Package Register (`Vendor_Package_Register.html`)
 An operational document register for package managers and lead engineers tracking vendor submittals, review cycles, and approval gates.
 
 - **Lifecycle Review Tracking:** Track submittals across statuses: *Pending*, *In Review*, *Commented*, *Approved*, and *Resubmission Required*.
@@ -88,7 +88,7 @@ An operational document register for package managers and lead engineers trackin
 
 ---
 
-### 3. ✍️ Signature Studio V2 (`.Digital Signature.html`)
+### 3. ✍️ Signature Studio V2 (`Digital_Signature.html`)
 A digital signature generation studio built for approvals, transmittals, and clean document endorsements.
 
 - **Hand-Drawn Vector Pad:** Smooth bezier stroke rendering with adjustable nib width, pressure smoothing, and ink palette.
@@ -98,7 +98,7 @@ A digital signature generation studio built for approvals, transmittals, and cle
 
 ---
 
-### 4. 🧹 Annotation Purge — PDF Cleaner (`.pdf_annotation_cleaner.html`)
+### 4. 🧹 Annotation Purge — PDF Cleaner (`PDF_Annotation_Cleaner.html`)
 A document hygiene utility for document controllers and engineers before external release.
 
 - **Markup Stripping:** Erases review comments, yellow sticky notes, highlight pens, freehand ink, strike-throughs, and review stamps.
@@ -107,7 +107,7 @@ A document hygiene utility for document controllers and engineers before externa
 
 ---
 
-### 5. 📑 PDF Merge & Rotate Studio (`.pdf_merge_rotate.html`)
+### 5. 📑 PDF Merge & Rotate Studio (`PDF_Merge_Rotate.html`)
 A self-contained PDF manipulation workstation for assembling drawing packages and vendor dossiers.
 
 - **Zero-Dependency Offline Operation:** Bundles embedded `pdf-lib` and `pdf.js` for 100% offline air-gapped performance.
@@ -116,7 +116,7 @@ A self-contained PDF manipulation workstation for assembling drawing packages an
 
 ---
 
-### 6. 📐 Linear Interpolation Auto-Calculator (`.LINEAR INTERPOLATION.html`)
+### 6. 📐 Linear Interpolation Auto-Calculator (`Linear_Interpolation.html`)
 A rapid mathematical calculation utility for process, piping, and mechanical engineers referencing discrete standards tables.
 
 - **Discrete Lookup Solving:** Perform instant 1D linear interpolations between discrete pressure-temperature tables (e.g., ASME B31.3 / B31.12, ASME B16.5 flange ratings, steam tables).
@@ -126,7 +126,7 @@ A rapid mathematical calculation utility for process, piping, and mechanical eng
 
 ---
 
-### 7. 🔤 Engineering & Developer Case Converter (`.Case_Converter.html`)
+### 7. 🔤 Engineering & Developer Case Converter (`Case_Converter.html`)
 A text transformation utility for drafting, equipment tagging, and data normalization.
 
 - **Supported Transformations:**
@@ -143,17 +143,17 @@ A text transformation utility for drafting, equipment tagging, and data normaliz
 ## 🛠️ Quick Reference & Usage
 
 ```
-┌───────────────────────────────┬─────────────────────────────────┬──────────────────────────────────────────┬───────────────────────┐
-│ File Name                     │ Launch Method                   │ Key Features                             │ Storage Key           │
-├───────────────────────────────┼─────────────────────────────────┼──────────────────────────────────────────┼───────────────────────┤
-│ EPC_PROJECT_TICKET.HTML       │ Double-click or open in browser │ Priority Matrix, RACI, Gantt, CSV Export │ plannerProjects, etc. │
-│ .Vendor_Package_Register.html │ Double-click or open in browser │ Submittal tracking, ExcelJS .xlsx export │ vendorRegisterState   │
-│ .Digital Signature.html       │ Double-click or open in browser │ 30 calligraphy styles, vector SVG, PNG   │ sigV2                 │
-│ .pdf_annotation_cleaner.html  │ Double-click or open in browser │ Purges stamps, annotations, sticky notes │ None (In-memory)      │
-│ .pdf_merge_rotate.html        │ Double-click or open in browser │ Offline pdf-lib/pdf.js merge & rotation  │ None (In-memory)      │
-│ .LINEAR INTERPOLATION.html    │ Double-click or open in browser │ Discrete table lookup & curve fit math   │ None (In-memory)      │
-│ .Case_Converter.html          │ Double-click or open in browser │ Tag casing, text stats, batch transforms │ None (In-memory)      │
-└───────────────────────────────┴─────────────────────────────────┴──────────────────────────────────────────┴───────────────────────┘
+┌──────────────────────────────┬─────────────────────────────────┬──────────────────────────────────────────┬───────────────────────┐
+│ File Name                    │ Launch Method                   │ Key Features                             │ Storage Key           │
+├──────────────────────────────┼─────────────────────────────────┼──────────────────────────────────────────┼───────────────────────┤
+│ EPC_Project_Ticket.html      │ Double-click or open in browser │ Priority Matrix, RACI, Gantt, CSV Export │ plannerProjects, etc. │
+│ Vendor_Package_Register.html │ Double-click or open in browser │ Submittal tracking, ExcelJS .xlsx export │ vendorRegisterState   │
+│ Digital_Signature.html       │ Double-click or open in browser │ 30 calligraphy styles, vector SVG, PNG   │ sigV2                 │
+│ PDF_Annotation_Cleaner.html  │ Double-click or open in browser │ Purges stamps, annotations, sticky notes │ None (In-memory)      │
+│ PDF_Merge_Rotate.html        │ Double-click or open in browser │ Offline pdf-lib/pdf.js merge & rotation  │ None (In-memory)      │
+│ Linear_Interpolation.html    │ Double-click or open in browser │ Discrete table lookup & curve fit math   │ None (In-memory)      │
+│ Case_Converter.html          │ Double-click or open in browser │ Tag casing, text stats, batch transforms │ None (In-memory)      │
+└──────────────────────────────┴─────────────────────────────────┴──────────────────────────────────────────┴───────────────────────┘
 ```
 
 ### 💻 How to Run Locally
@@ -176,15 +176,15 @@ You do not need Node.js, Python, Docker, or any web server to run these tools:
 
 ```
 FUN_OFFICE_ARTIFACTS/
-├── EPC_PROJECT_TICKET.HTML          # EPC ticket manager & Eisenhower RACI planner
-├── .Vendor_Package_Register.html   # Vendor submittal & document tracking dashboard
-├── .Digital Signature.html         # Signature Studio V2 (hand-drawn + 30 styles)
-├── .pdf_annotation_cleaner.html    # PDF review comment & markup purge utility
-├── .pdf_merge_rotate.html          # Self-contained offline PDF merge & page rotate
-├── .LINEAR INTERPOLATION.html      # Engineering lookup & steam table interpolator
-├── .Case_Converter.html            # Multi-mode text & equipment tag case converter
-├── LICENSE                         # MIT License
-└── README.md                       # Comprehensive documentation
+├── EPC_Project_Ticket.html          # EPC ticket manager & Eisenhower RACI planner
+├── Vendor_Package_Register.html     # Vendor submittal & document tracking dashboard
+├── Digital_Signature.html           # Signature Studio V2 (hand-drawn + 30 styles)
+├── PDF_Annotation_Cleaner.html      # PDF review comment & markup purge utility
+├── PDF_Merge_Rotate.html            # Self-contained offline PDF merge & page rotate
+├── Linear_Interpolation.html        # Engineering lookup & steam table interpolator
+├── Case_Converter.html              # Multi-mode text & equipment tag case converter
+├── LICENSE                          # MIT License
+└── README.md                        # Comprehensive documentation
 ```
 
 ---
