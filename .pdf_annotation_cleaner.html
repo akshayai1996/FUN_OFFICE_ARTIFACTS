@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Annotation Purge — PDF Cleaner</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #0A1B2A;
+    background-image:
+      linear-gradient(rgba(143,196,222,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(143,196,222,0.05) 1px, transparent 1px);
+    background-size: 24px 24px;
+    color: #DCEAF2;
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace;
+    min-height: 100vh;
+    padding: 28px 16px 60px;
+  }
+  .sheet {
+    max-width: 760px;
+    margin: 0 auto;
+    border: 1px solid rgba(143,196,222,0.35);
+    position: relative;
+    background: rgba(15,36,54,0.55);
+  }
+  .ruler-top, .ruler-bottom {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    border-bottom: 1px solid rgba(143,196,222,0.35);
+  }
+  .ruler-bottom { border-bottom: none; border-top: 1px solid rgba(143,196,222,0.35); }
+  .ruler-top div, .ruler-bottom div {
+    text-align: center;
+    font-size: 10px;
+    color: #5A7A8C;
+    padding: 3px 0;
+    border-right: 1px solid rgba(143,196,222,0.15);
+    letter-spacing: 1px;
+  }
+  .ruler-top div:last-child, .ruler-bottom div:last-child { border-right: none; }
+  .body-row { display: flex; }
+  .ruler-side {
+    width: 22px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(143,196,222,0.35);
+  }
+  .ruler-side div {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #5A7A8C;
+    border-bottom: 1px solid rgba(143,196,222,0.15);
+  }
+  .ruler-side div:last-child { border-bottom: none; }
+  .content { flex: 1; padding: 28px 32px; min-width: 0; }
+
+  .crosshair { width: 34px; height: 34px; flex-shrink: 0; }
+  .crosshair circle { fill: none; stroke: #8FD8FF; stroke-width: 1.2; }
+  .crosshair line { stroke: #8FD8FF; stroke-width: 1.2; }
+
+  .head { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
+  .head h1 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    margin: 0;
+    text-transform: uppercase;
+    color: #EAF4FA;
+  }
+  .head p { margin: 3px 0 0; font-size: 12px; color: #6E8CA0; letter-spacing: 0.3px; }
+
+  .findings {
+    margin: 22px 0;
+    border: 1px solid rgba(255,107,87,0.4);
+    background: rgba(255,107,87,0.06);
+    padding: 12px 14px;
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: #C9DCE6;
+  }
+  .findings b { color: #FF9585; font-weight: 600; }
+  .findings code {
+    background: rgba(255,107,87,0.15);
+    padding: 1px 5px;
+    border-radius: 2px;
+    color: #FFB3A6;
+    font-size: 12px;
+  }
+
+  .dropzone {
+    margin-top: 22px;
+    border: 1.5px dashed rgba(143,196,222,0.4);
+    padding: 34px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    position: relative;
+  }
+  .dropzone.drag { border-color: #8FD8FF; background: rgba(143,196,222,0.06); }
+  .dropzone .tick { position: absolute; width: 10px; height: 10px; }
+  .dropzone .tl { top: -1px; left: -1px; border-top: 1.5px solid #8FD8FF; border-left: 1.5px solid #8FD8FF; }
+  .dropzone .tr { top: -1px; right: -1px; border-top: 1.5px solid #8FD8FF; border-right: 1.5px solid #8FD8FF; }
+  .dropzone .bl { bottom: -1px; left: -1px; border-bottom: 1.5px solid #8FD8FF; border-left: 1.5px solid #8FD8FF; }
+  .dropzone .br { bottom: -1px; right: -1px; border-bottom: 1.5px solid #8FD8FF; border-right: 1.5px solid #8FD8FF; }
+  .dropzone .label { font-size: 13px; color: #B7CFDB; letter-spacing: 0.4px; }
+  .dropzone .sub { font-size: 11px; color: #587082; margin-top: 6px; }
+  .dropzone input { display: none; }
+
+  .filebar {
+    display: none;
+    margin-top: 16px;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid rgba(143,196,222,0.3);
+    padding: 10px 14px;
+    font-size: 12.5px;
+  }
+  .filebar .name { color: #EAF4FA; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 340px; }
+  .filebar .size { color: #587082; margin-left: 8px; }
+  .filebar button.clear {
+    background: none; border: none; color: #587082; cursor: pointer;
+    font-family: inherit; font-size: 16px; padding: 0 4px;
+  }
+  .filebar button.clear:hover { color: #FF9585; }
+
+  button.run {
+    margin-top: 18px;
+    width: 100%;
+    background: rgba(143,196,222,0.1);
+    border: 1px solid #8FD8FF;
+    color: #EAF4FA;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  button.run:hover:not(:disabled) { background: rgba(143,196,222,0.2); }
+  button.run:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .status { margin-top: 14px; font-size: 12px; color: #6E8CA0; min-height: 16px; }
+
+  table.log {
+    margin-top: 18px;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    display: none;
+  }
+  table.log caption {
+    text-align: left;
+    font-size: 10.5px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #5A7A8C;
+    padding-bottom: 6px;
+  }
+  table.log th, table.log td {
+    border: 1px solid rgba(143,196,222,0.2);
+    padding: 6px 10px;
+    text-align: left;
+  }
+  table.log th {
+    color: #8FD8FF;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    background: rgba(143,196,222,0.05);
+  }
+  table.log td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.log tfoot td { color: #EAF4FA; font-weight: 600; border-top: 1.5px solid rgba(143,196,222,0.4); }
+  table.log tr.flagged td.num.removed { color: #FF9585; }
+
+  .empty-note { display: none; margin-top: 18px; font-size: 12px; color: #6E8CA0; }
+
+  .download {
+    display: none;
+    margin-top: 18px;
+    width: 100%;
+    background: rgba(95,224,192,0.1);
+    border: 1px solid #5FE0C0;
+    color: #EAF4FA;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .download:hover { background: rgba(95,224,192,0.2); }
+
+  .error {
+    display: none;
+    margin-top: 16px;
+    border: 1px solid rgba(255,107,87,0.5);
+    background: rgba(255,107,87,0.08);
+    padding: 12px 14px;
+    font-size: 12.5px;
+    color: #FFB3A6;
+    line-height: 1.6;
+  }
+
+  .titleblock {
+    display: flex;
+    border-top: 1px solid rgba(143,196,222,0.35);
+    font-size: 10.5px;
+  }
+  .titleblock .field {
+    flex: 1;
+    padding: 8px 12px;
+    border-right: 1px solid rgba(143,196,222,0.25);
+  }
+  .titleblock .field:last-child { border-right: none; }
+  .titleblock .field .k { color: #587082; letter-spacing: 1px; text-transform: uppercase; font-size: 9px; margin-bottom: 3px; }
+  .titleblock .field .v { color: #C9DCE6; }
+
+  @media (max-width: 600px) {
+    .content { padding: 22px 16px; }
+    .ruler-side { width: 16px; }
+    .ruler-top div, .ruler-bottom div, .ruler-side div { font-size: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <div class="ruler-top" id="rulerTop"></div>
+  <div class="body-row">
+    <div class="ruler-side" id="rulerSide"></div>
+    <div class="content">
+
+      <div class="head">
+        <svg class="crosshair" viewBox="0 0 34 34"><circle cx="17" cy="17" r="14"/><line x1="17" y1="1" x2="17" y2="33"/><line x1="1" y1="17" x2="33" y2="17"/></svg>
+        <div>
+          <h1>Annotation purge</h1>
+          <p>Strips leftover CAD-export markers · runs entirely in this tab</p>
+        </div>
+      </div>
+
+      <div class="findings">
+        <b>What this removes —</b> AutoCAD SHX-font placeholder markers that get carried into the PDF on DWG export. Nitro repaints them as yellow boxes on save. Every one of them is stamped with author <code>AutoCAD SHX Text</code> — that's the signal this tool keys on, backed by a direct yellow-color check as a fallback. Your own review markup (red lines, callouts, stamps — anything with a real author name) is never touched. Nothing leaves your browser: the file is processed locally and never uploaded anywhere.
+      </div>
+
+      <div class="dropzone" id="dropzone">
+        <div class="tick tl"></div><div class="tick tr"></div><div class="tick bl"></div><div class="tick br"></div>
+        <div class="label" id="dzLabel">Drop a PDF here, or click to browse</div>
+        <div class="sub">Processed locally in your browser — nothing is uploaded</div>
+        <input type="file" id="fileInput" accept="application/pdf">
+      </div>
+
+      <div class="filebar" id="filebar">
+        <span><span class="name" id="fileName"></span><span class="size" id="fileSize"></span></span>
+        <button class="clear" id="clearBtn" title="Remove file" aria-label="Remove file">&times;</button>
+      </div>
+
+      <button class="run" id="runBtn" disabled>Clean PDF</button>
+
+      <div class="status" id="status"></div>
+
+      <div class="error" id="errorBox"></div>
+
+      <table class="log" id="logTable">
+        <caption>Revision table — annotations removed</caption>
+        <thead><tr><th>Page</th><th>Author tag / color match</th><th class="num">Removed</th></tr></thead>
+        <tbody id="logBody"></tbody>
+        <tfoot><tr><td colspan="2">Total</td><td class="num" id="logTotal">0</td></tr></tfoot>
+      </table>
+
+      <div class="empty-note" id="emptyNote">No AutoCAD SHX Text or yellow-flagged annotations found — this file was already clean.</div>
+
+      <a class="download" id="downloadBtn" download="cleaned.pdf">Download cleaned PDF</a>
+
+    </div>
+  </div>
+  <div class="ruler-bottom" id="rulerBottom"></div>
+
+  <div class="titleblock">
+    <div class="field"><div class="k">Detection</div><div class="v">Author tag + color fallback</div></div>
+    <div class="field"><div class="k">Scope</div><div class="v">/Square annotations, all pages</div></div>
+    <div class="field"><div class="k">Output</div><div class="v">Cleaned copy, original untouched</div></div>
+  </div>
+</div>
+
+<script>
+  const nums = "12345678";
+  const letters = "ABCDEFGH";
+  document.getElementById('rulerTop').innerHTML = nums.split('').map(n => `<div>${n}</div>`).join('');
+  document.getElementById('rulerBottom').innerHTML = nums.split('').map(n => `<div>${n}</div>`).join('');
+  document.getElementById('rulerSide').innerHTML = letters.split('').map(l => `<div>${l}</div>`).join('');
+
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  const filebar = document.getElementById('filebar');
+  const fileNameEl = document.getElementById('fileName');
+  const fileSizeEl = document.getElementById('fileSize');
+  const clearBtn = document.getElementById('clearBtn');
+  const runBtn = document.getElementById('runBtn');
+  const statusEl = document.getElementById('status');
+  const errorBox = document.getElementById('errorBox');
+  const logTable = document.getElementById('logTable');
+  const logBody = document.getElementById('logBody');
+  const logTotal = document.getElementById('logTotal');
+  const emptyNote = document.getElementById('emptyNote');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const dzLabel = document.getElementById('dzLabel');
+
+  let selectedFile = null;
+
+  function fmtSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function resetOutputs() {
+    errorBox.style.display = 'none';
+    logTable.style.display = 'none';
+    emptyNote.style.display = 'none';
+    downloadBtn.style.display = 'none';
+    logBody.innerHTML = '';
+    statusEl.textContent = '';
+    if (downloadBtn.href && downloadBtn.href.startsWith('blob:')) {
+      URL.revokeObjectURL(downloadBtn.href);
+    }
+  }
+
+  function setFile(file) {
+    if (!file) return;
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      showError('That is not a PDF file. Choose a .pdf file to continue.');
+      return;
+    }
+    selectedFile = file;
+    fileNameEl.textContent = file.name;
+    fileSizeEl.textContent = ' — ' + fmtSize(file.size);
+    filebar.style.display = 'flex';
+    dzLabel.textContent = 'Drop a different PDF to replace it';
+    runBtn.disabled = false;
+    resetOutputs();
+  }
+
+  function showError(message) {
+    errorBox.textContent = message;
+    errorBox.style.display = 'block';
+    statusEl.textContent = '';
+  }
+
+  dropzone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', (e) => setFile(e.target.files[0]));
+
+  ['dragenter', 'dragover'].forEach(evt => {
+    dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.add('drag'); });
+  });
+  ['dragleave', 'drop'].forEach(evt => {
+    dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.remove('drag'); });
+  });
+  dropzone.addEventListener('drop', (e) => {
+    const file = e.dataTransfer.files[0];
+    setFile(file);
+  });
+
+  clearBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    selectedFile = null;
+    fileInput.value = '';
+    filebar.style.display = 'none';
+    dzLabel.textContent = 'Drop a PDF here, or click to browse';
+    runBtn.disabled = true;
+    resetOutputs();
+  });
+
+  function classifyAnnotation(dict, PDFName) {
+    // Hard scope guard: only ever consider /Square annotations. This is what
+    // AutoCAD SHX Text placeholders are exported as, and it structurally
+    // excludes human review markup (/FreeText, /Highlight, /Ink, /Text, etc.)
+    // regardless of what color it happens to be.
+    const subtype = dict.lookup(PDFName.of('Subtype'));
+    if (!subtype || subtype.asString() !== '/Square') return null;
+
+    // Author tag is a fully reliable signal for AutoCAD's SHX Text export —
+    // no color heuristic needed (and a color-based fallback is exactly what
+    // was deleting real yellow review comments before).
+    const tVal = dict.lookup(PDFName.of('T'));
+    if (tVal && typeof tVal.decodeText === 'function') {
+      try {
+        const t = tVal.decodeText().trim().toLowerCase();
+        if (t === 'autocad shx text') return 'AutoCAD SHX Text';
+      } catch (e) {}
+    }
+    return null;
+  }
+
+  async function cleanPdf(file) {
+    const { PDFDocument, PDFName, PDFDict, PDFRef } = PDFLib;
+    const bytes = await file.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false });
+    const pages = pdfDoc.getPages();
+
+    const rows = [];
+    let totalRemoved = 0;
+
+    for (let p = 0; p < pages.length; p++) {
+      const page = pages[p];
+      const annots = page.node.Annots();
+      if (!annots) continue;
+
+      const size = annots.size();
+      const removeKeys = new Set();
+      const popupKeysToRemove = new Set();
+      const reasonCounts = {};
+
+      for (let i = 0; i < size; i++) {
+        const ref = annots.get(i);
+        if (!(ref instanceof PDFRef)) continue;
+        let dict;
+        try { dict = pdfDoc.context.lookup(ref, PDFDict); } catch (e) { continue; }
+        if (!dict) continue;
+
+        const reason = classifyAnnotation(dict, PDFName);
+        if (reason) {
+          const key = ref.objectNumber + '_' + ref.generationNumber;
+          removeKeys.add(key);
+          reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
+
+          const popupRef = dict.get(PDFName.of('Popup'));
+          if (popupRef instanceof PDFRef) {
+            popupKeysToRemove.add(popupRef.objectNumber + '_' + popupRef.generationNumber);
+          }
+        }
+      }
+
+      if (removeKeys.size === 0) continue;
+
+      const kept = [];
+      let removedHere = 0;
+      for (let i = 0; i < size; i++) {
+        const ref = annots.get(i);
+        if (ref instanceof PDFRef) {
+          const key = ref.objectNumber + '_' + ref.generationNumber;
+          if (removeKeys.has(key)) { removedHere++; continue; }
+          if (popupKeysToRemove.has(key)) { continue; }
+        }
+        kept.push(ref);
+      }
+
+      const newArr = pdfDoc.context.obj(kept);
+      page.node.set(PDFName.of('Annots'), newArr);
+
+      totalRemoved += removedHere;
+      const reasonLabel = Object.entries(reasonCounts).map(([k, v]) => `${k} (${v})`).join(', ');
+      rows.push({ page: p + 1, reason: reasonLabel, removed: removedHere });
+    }
+
+    const outBytes = await pdfDoc.save();
+    return { outBytes, rows, totalRemoved, pageCount: pages.length };
+  }
+
+  runBtn.addEventListener('click', async () => {
+    if (!selectedFile) return;
+    resetOutputs();
+    runBtn.disabled = true;
+    statusEl.textContent = 'Reading annotation tree…';
+
+    try {
+      await new Promise(r => setTimeout(r, 30));
+      const result = await cleanPdf(selectedFile);
+
+      if (result.totalRemoved === 0) {
+        emptyNote.style.display = 'block';
+      } else {
+        logBody.innerHTML = result.rows.map(row => `
+          <tr class="flagged">
+            <td>${row.page} / ${result.pageCount}</td>
+            <td>${row.reason}</td>
+            <td class="num removed">${row.removed}</td>
+          </tr>
+        `).join('');
+        logTotal.textContent = result.totalRemoved;
+        logTable.style.display = 'table';
+      }
+
+      const blob = new Blob([result.outBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const baseName = selectedFile.name.replace(/\.pdf$/i, '');
+      downloadBtn.href = url;
+      downloadBtn.download = baseName + '_cleaned.pdf';
+      downloadBtn.style.display = 'block';
+
+      statusEl.textContent = `Done — scanned ${result.pageCount} page${result.pageCount === 1 ? '' : 's'}, removed ${result.totalRemoved} annotation${result.totalRemoved === 1 ? '' : 's'}.`;
+    } catch (err) {
+      console.error(err);
+      showError('Could not process this PDF: ' + (err && err.message ? err.message : String(err)) + '. If the file is password-protected or heavily locked down, remove that first and try again.');
+    } finally {
+      runBtn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>

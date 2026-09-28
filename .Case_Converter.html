@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Case Converter</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f8;
+            color: #17202a;
+            display: flex;
+            justify-content: center;
+            padding: 28px 16px;
+        }
+        .app {
+            width: min(1000px, 100%);
+        }
+        .header {
+            margin-bottom: 18px;
+        }
+        h1 {
+            margin: 0 0 6px;
+            font-size: 28px;
+        }
+        .subtitle {
+            margin: 0;
+            color: #667085;
+            font-size: 14px;
+        }
+        .card {
+            background: white;
+            border: 1px solid #dfe4ea;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, .05);
+        }
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            resize: vertical;
+            border: 1px solid #cfd6de;
+            border-radius: 10px;
+            padding: 15px;
+            font: 15px/1.55 Consolas, "Courier New", monospace;
+            outline: none;
+        }
+        textarea:focus {
+            border-color: #667085;
+            box-shadow: 0 0 0 3px rgba(102, 112, 133, .12);
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 14px 0;
+        }
+        button {
+            border: 1px solid #cbd2da;
+            background: #fff;
+            color: #17202a;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        button:hover {
+            background: #f2f4f7;
+        }
+        button.primary {
+            background: #17202a;
+            color: white;
+            border-color: #17202a;
+        }
+        button.primary:hover {
+            background: #303b46;
+        }
+        .status {
+            min-height: 20px;
+            font-size: 13px;
+            color: #667085;
+            margin-top: 8px;
+        }
+        .footer {
+            margin-top: 10px;
+            text-align: center;
+            color: #98a2b3;
+            font-size: 12px;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 18px 10px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            textarea {
+                min-height: 240px;
+            }
+            button {
+                flex: 1 1 calc(50% - 8px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="header">
+            <h1>Case Converter</h1>
+            <p class="subtitle">Convert text to Sentence case, UPPER CASE, lower case, Title Case, or toggle case.</p>
+        </div>
+
+        <div class="card">
+            <textarea id="text" placeholder="Paste or type your text here..."></textarea>
+
+            <div class="toolbar">
+                <button class="primary" onclick="sentenceCase()">Sentence case</button>
+                <button onclick="upperCase()">UPPER CASE</button>
+                <button onclick="lowerCase()">lower case</button>
+                <button onclick="titleCase()">Title Case</button>
+                <button onclick="toggleCase()">tOGGLE cASE</button>
+                <button onclick="copyText()">Copy</button>
+                <button onclick="clearText()">Clear</button>
+            </div>
+
+            <div id="status" class="status" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="footer">Works completely offline — no data is uploaded or sent anywhere.</div>
+    </div>
+
+    <script>
+        const box = document.getElementById("text");
+        const statusEl = document.getElementById("status");
+
+        function setStatus(message) {
+            statusEl.textContent = message;
+            clearTimeout(window.statusTimer);
+            window.statusTimer = setTimeout(() => statusEl.textContent = "", 1800);
+        }
+
+        // ----- Sentence case -----
+        // Capitalises the first letter after sentence-ending punctuation (. ! ?).
+        // Limitation: common abbreviations (e.g. "i.e.", "e.g.") are not skipped,
+        // so they may cause unwanted capitalisation in the next word.
+        function sentenceCase() {
+            let s = box.value.toLowerCase();
+            s = s.replace(/(^|[.!?]\s+)([a-z])/g, (_, prefix, letter) =>
+                prefix + letter.toUpperCase()
+            );
+            box.value = s;
+            setStatus("Converted to Sentence case");
+        }
+
+        // ----- UPPER CASE -----
+        function upperCase() {
+            box.value = box.value.toUpperCase();
+            setStatus("Converted to UPPER CASE");
+        }
+
+        // ----- lower case -----
+        function lowerCase() {
+            box.value = box.value.toLowerCase();
+            setStatus("Converted to lower case");
+        }
+
+        // ----- Title Case -----
+        // Capitalises the first character of each "word" (sequence of non-space chars).
+        // This handles contractions correctly ("don't" → "Don't").
+        // Limitation: names with apostrophes ("O'Brian" → "O'brian") are not ideally handled.
+        function titleCase() {
+            box.value = box.value.replace(/\S+/g, word =>
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            );
+            setStatus("Converted to Title Case");
+        }
+
+        // ----- tOGGLE cASE -----
+        function toggleCase() {
+            box.value = [...box.value].map(c =>
+                c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase()
+            ).join("");
+            setStatus("Case toggled");
+        }
+
+        // ----- Copy -----
+        async function copyText() {
+            if (!box.value) {
+                setStatus("Nothing to copy");
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(box.value);
+                setStatus("Copied to clipboard ✓");
+            } catch {
+                box.select();
+                document.execCommand("copy");
+                box.setSelectionRange(box.value.length, box.value.length);
+                setStatus("Copied to clipboard ✓");
+            }
+        }
+
+        // ----- Clear -----
+        function clearText() {
+            box.value = "";
+            box.focus();
+            setStatus("Cleared");
+        }
+
+        // Keyboard shortcut: Ctrl+Enter → Sentence case
+        box.addEventListener("keydown", e => {
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                e.preventDefault();
+                sentenceCase();
+            }
+        });
+    </script>
+</body>
+</html>

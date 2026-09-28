@@ -1,0 +1,530 @@
+<!--
+===============================================================================
+LINEAR INTERPOLATION AUTO CALCULATOR
+===============================================================================
+Author      : ChatGPT
+Version     : 2.0
+Date        : 2026-06-05
+Description :
+    Professional Linear Interpolation Calculator
+
+Features:
+    ✔ Forward Interpolation  (Find Y from X)
+    ✔ Reverse Interpolation (Find X from Y)
+    ✔ Auto-detect mode
+    ✔ Real-time calculation
+    ✔ Error handling
+    ✔ Responsive design
+    ✔ Engineering style UI
+
+Formula:
+    Forward:
+        y = y1 + ((x - x1)(y2 - y1)) / (x2 - x1)
+
+    Reverse:
+        x = x1 + ((y - y1)(x2 - x1)) / (y2 - y1)
+
+===============================================================================
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Linear Interpolation Calculator</title>
+
+<style>
+
+    *{
+        box-sizing:border-box;
+    }
+
+    body{
+        margin:0;
+        padding:40px;
+        font-family:Arial, sans-serif;
+        background:#eef2f7;
+    }
+
+    .container{
+
+        max-width:850px;
+        margin:auto;
+
+        background:white;
+
+        padding:35px;
+
+        border-radius:15px;
+
+        box-shadow:
+            0 5px 20px rgba(0,0,0,0.12);
+
+    }
+
+    h1{
+
+        text-align:center;
+        color:#174a7c;
+
+        margin-top:0;
+        margin-bottom:35px;
+
+    }
+
+    .grid{
+
+        display:grid;
+
+        grid-template-columns:
+            repeat(auto-fit,minmax(250px,1fr));
+
+        gap:22px;
+
+    }
+
+    .field{
+
+        display:flex;
+        flex-direction:column;
+
+    }
+
+    label{
+
+        font-weight:bold;
+        margin-bottom:8px;
+        color:#333;
+
+    }
+
+    input{
+
+        padding:13px;
+
+        border:1px solid #cfd8e3;
+
+        border-radius:10px;
+
+        font-size:16px;
+
+        transition:0.2s;
+
+    }
+
+    input:focus{
+
+        outline:none;
+
+        border-color:#174a7c;
+
+        box-shadow:
+            0 0 5px rgba(23,74,124,0.4);
+
+    }
+
+    .section-title{
+
+        margin-top:35px;
+        margin-bottom:18px;
+
+        font-size:20px;
+
+        color:#174a7c;
+
+        border-bottom:2px solid #dfe8f1;
+
+        padding-bottom:8px;
+
+    }
+
+    .result{
+
+        margin-top:30px;
+
+        padding:25px;
+
+        background:#f4faff;
+
+        border-left:7px solid #174a7c;
+
+        border-radius:12px;
+
+    }
+
+    .result h2{
+
+        margin-top:0;
+        color:#174a7c;
+
+    }
+
+    .result-value{
+
+        font-size:28px;
+        font-weight:bold;
+        color:#111;
+
+        margin-top:10px;
+
+    }
+
+    .formula{
+
+        margin-top:30px;
+
+        background:#fafafa;
+
+        padding:22px;
+
+        border-radius:10px;
+
+        border:1px solid #e0e0e0;
+
+        font-family:Consolas, monospace;
+
+        overflow:auto;
+
+        line-height:1.8;
+
+    }
+
+    .error{
+
+        color:#d00000;
+
+        font-weight:bold;
+
+        margin-top:12px;
+
+    }
+
+    .info{
+
+        margin-top:15px;
+
+        color:#555;
+
+        line-height:1.6;
+
+    }
+
+    @media(max-width:600px){
+
+        body{
+            padding:15px;
+        }
+
+        .container{
+            padding:22px;
+        }
+
+    }
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Linear Interpolation Calculator</h1>
+
+    <!-- ===================================================== -->
+    <!-- KNOWN VALUES -->
+    <!-- ===================================================== -->
+
+    <div class="section-title">
+        Known Points
+    </div>
+
+    <div class="grid">
+
+        <div class="field">
+            <label>X1</label>
+            <input type="number" id="x1" step="any">
+        </div>
+
+        <div class="field">
+            <label>Y1</label>
+            <input type="number" id="y1" step="any">
+        </div>
+
+        <div class="field">
+            <label>X2</label>
+            <input type="number" id="x2" step="any">
+        </div>
+
+        <div class="field">
+            <label>Y2</label>
+            <input type="number" id="y2" step="any">
+        </div>
+
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- TARGET VALUES -->
+    <!-- ===================================================== -->
+
+    <div class="section-title">
+        Target Input
+    </div>
+
+    <div class="grid">
+
+        <div class="field">
+            <label>Target X (Find Y)</label>
+            <input type="number" id="targetX" step="any">
+        </div>
+
+        <div class="field">
+            <label>Target Y (Find X)</label>
+            <input type="number" id="targetY" step="any">
+        </div>
+
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- RESULTS -->
+    <!-- ===================================================== -->
+
+    <div class="result">
+
+        <h2>Calculated Result</h2>
+
+        <div id="output" class="result-value">
+            Enter values to calculate...
+        </div>
+
+        <div id="mode" class="info"></div>
+
+        <div id="error" class="error"></div>
+
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- FORMULAS -->
+    <!-- ===================================================== -->
+
+    <div class="formula">
+
+        <strong>Forward Interpolation:</strong><br>
+        y = y1 + ((x - x1)(y2 - y1)) / (x2 - x1)
+
+        <br><br>
+
+        <strong>Reverse Interpolation:</strong><br>
+        x = x1 + ((y - y1)(x2 - x1)) / (y2 - y1)
+
+    </div>
+
+</div>
+
+<script>
+
+    // =========================================================
+    // INPUT LISTENERS
+    // =========================================================
+
+    const inputs = document.querySelectorAll("input");
+
+    inputs.forEach(input => {
+
+        input.addEventListener(
+            "input",
+            calculateInterpolation
+        );
+
+    });
+
+    // =========================================================
+    // MAIN FUNCTION
+    // =========================================================
+
+    function calculateInterpolation(){
+
+        // -----------------------------------------------------
+        // READ VALUES
+        // -----------------------------------------------------
+
+        const x1 = parseFloat(
+            document.getElementById("x1").value
+        );
+
+        const y1 = parseFloat(
+            document.getElementById("y1").value
+        );
+
+        const x2 = parseFloat(
+            document.getElementById("x2").value
+        );
+
+        const y2 = parseFloat(
+            document.getElementById("y2").value
+        );
+
+        const targetX = parseFloat(
+            document.getElementById("targetX").value
+        );
+
+        const targetY = parseFloat(
+            document.getElementById("targetY").value
+        );
+
+        // -----------------------------------------------------
+        // OUTPUT ELEMENTS
+        // -----------------------------------------------------
+
+        const output =
+            document.getElementById("output");
+
+        const mode =
+            document.getElementById("mode");
+
+        const error =
+            document.getElementById("error");
+
+        // -----------------------------------------------------
+        // RESET
+        // -----------------------------------------------------
+
+        error.innerHTML = "";
+        mode.innerHTML  = "";
+
+        // -----------------------------------------------------
+        // CHECK BASE VALUES
+        // -----------------------------------------------------
+
+        if(
+            isNaN(x1) ||
+            isNaN(y1) ||
+            isNaN(x2) ||
+            isNaN(y2)
+        ){
+
+            output.innerHTML =
+                "Enter all known point values.";
+
+            return;
+
+        }
+
+        // =====================================================
+        // FORWARD INTERPOLATION
+        // =====================================================
+
+        if(
+            !isNaN(targetX) &&
+            isNaN(targetY)
+        ){
+
+            if(x2 === x1){
+
+                output.innerHTML = "-";
+
+                error.innerHTML =
+                    "ERROR: X1 and X2 cannot be equal.";
+
+                return;
+
+            }
+
+            const y =
+
+                y1 +
+
+                (
+                    ((targetX - x1) *
+                    (y2 - y1))
+                    /
+                    (x2 - x1)
+                );
+
+            output.innerHTML =
+                "Y = " + y.toFixed(6);
+
+            mode.innerHTML =
+                "Mode: Forward Interpolation (Finding Y from X)";
+
+            return;
+
+        }
+
+        // =====================================================
+        // REVERSE INTERPOLATION
+        // =====================================================
+
+        if(
+            !isNaN(targetY) &&
+            isNaN(targetX)
+        ){
+
+            if(y2 === y1){
+
+                output.innerHTML = "-";
+
+                error.innerHTML =
+                    "ERROR: Y1 and Y2 cannot be equal.";
+
+                return;
+
+            }
+
+            const x =
+
+                x1 +
+
+                (
+                    ((targetY - y1) *
+                    (x2 - x1))
+                    /
+                    (y2 - y1)
+                );
+
+            output.innerHTML =
+                "X = " + x.toFixed(6);
+
+            mode.innerHTML =
+                "Mode: Reverse Interpolation (Finding X from Y)";
+
+            return;
+
+        }
+
+        // =====================================================
+        // BOTH TARGETS ENTERED
+        // =====================================================
+
+        if(
+            !isNaN(targetX) &&
+            !isNaN(targetY)
+        ){
+
+            output.innerHTML =
+                "Invalid Input";
+
+            error.innerHTML =
+                "Enter ONLY Target X OR ONLY Target Y.";
+
+            return;
+
+        }
+
+        // =====================================================
+        // NO TARGETS ENTERED
+        // =====================================================
+
+        output.innerHTML =
+            "Enter Target X OR Target Y.";
+
+    }
+
+</script>
+
+</body>
+</html>

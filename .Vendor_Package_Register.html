@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendor Package Register</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14181d;
+    --panel:#1b2128;
+    --panel-2:#20272f;
+    --border:#2c343d;
+    --border-strong:#3a4450;
+    --text:#e6e9ec;
+    --muted:#8b96a3;
+    --accent:#e8a33d;
+    --accent-dim:#8a6a2e;
+    --info:#5b8aa6;
+    --good:#5a9367;
+    --bad:#c0503f;
+    --critical:#d9634a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+    font-size:14px;
+    line-height:1.5;
+  }
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace;}
+  a{color:var(--info);}
+
+  .titleblock{
+    border:1px solid var(--border-strong);
+    margin:16px;
+    display:grid;
+    grid-template-columns: 1.4fr 1fr 1fr 0.9fr;
+    background:var(--panel);
+  }
+  .tb-cell{
+    border-right:1px solid var(--border-strong);
+    border-bottom:1px solid var(--border-strong);
+    padding:10px 14px;
+  }
+  .tb-cell:last-child{border-right:none;}
+  .tb-label{
+    font-size:10px;
+    letter-spacing:.04em;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+  .tb-main{
+    grid-column: 1 / -1;
+    border-bottom:1px solid var(--border-strong);
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .tb-title{
+    font-size:20px;
+    font-weight:600;
+    letter-spacing:.01em;
+  }
+  .tb-sub{color:var(--muted);font-size:12.5px;margin-top:2px;}
+  select, input[type=text], input[type=date], textarea{
+    background:var(--panel-2);
+    border:1px solid var(--border-strong);
+    color:var(--text);
+    padding:7px 9px;
+    font-family:inherit;
+    font-size:13px;
+    border-radius:3px;
+    width:100%;
+  }
+  select:focus, input:focus, textarea:focus{
+    outline:1px solid var(--accent);
+    outline-offset:0;
+  }
+  button{
+    font-family:inherit;
+    font-size:13px;
+    cursor:pointer;
+    border-radius:3px;
+    border:1px solid var(--border-strong);
+    background:var(--panel-2);
+    color:var(--text);
+    padding:7px 12px;
+  }
+  button:hover{border-color:var(--accent);}
+  button.primary{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#1a1305;
+    font-weight:600;
+  }
+  button.primary:hover{filter:brightness(1.08);}
+  button.ghost{background:transparent;}
+  button.danger:hover{border-color:var(--bad); color:var(--bad);}
+  .btnrow{display:flex; gap:8px; flex-wrap:wrap;}
+
+  .folder-row{display:flex; gap:8px; align-items:center;}
+  .folder-row input{flex:1;}
+
+  .wrap{max-width:1400px; margin:0 auto;}
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:1px;
+    background:var(--border-strong);
+    border:1px solid var(--border-strong);
+    margin:0 16px 16px;
+  }
+  .stat{
+    background:var(--panel);
+    padding:14px 16px;
+  }
+  .stat .num{font-size:26px; font-weight:600; font-family:'IBM Plex Mono';}
+  .stat .lbl{font-size:11px; color:var(--muted); letter-spacing:.03em; margin-top:2px;}
+  .stat.warn .num{color:var(--critical);}
+
+  .toolbar{
+    margin:0 16px 10px;
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .toolbar .filters{display:flex; gap:8px; flex-wrap:wrap;}
+  .toolbar select, .toolbar input{width:auto; min-width:120px;}
+
+  table{
+    width:calc(100% - 32px);
+    margin:0 16px 24px;
+    border-collapse:collapse;
+    border:1px solid var(--border-strong);
+    background:var(--panel);
+  }
+  th{
+    text-align:left;
+    font-size:11px;
+    letter-spacing:.03em;
+    color:var(--muted);
+    font-weight:600;
+    padding:9px 10px;
+    border-bottom:1px solid var(--border-strong);
+    border-right:1px solid var(--border);
+    background:var(--panel-2);
+    white-space:nowrap;
+    cursor:pointer;
+    user-select:none;
+  }
+  th:last-child{border-right:none;}
+  th:hover{color:var(--text);}
+  td{
+    padding:9px 10px;
+    border-bottom:1px solid var(--border);
+    border-right:1px solid var(--border);
+    vertical-align:top;
+    font-size:13px;
+  }
+  td:last-child{border-right:none;}
+  tr.overdue td{background:rgba(192,80,63,0.08);}
+  tr:hover td{background:rgba(255,255,255,0.02);}
+  tr.overdue:hover td{background:rgba(192,80,63,0.14);}
+
+  .badge{
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:2px;
+    font-size:11px;
+    font-family:'IBM Plex Mono';
+    border:1px solid transparent;
+    white-space:nowrap;
+  }
+  .b-pending{color:var(--muted); border-color:var(--border-strong);}
+  .b-review{color:var(--info); border-color:var(--info);}
+  .b-comment{color:var(--accent); border-color:var(--accent);}
+  .b-resub{color:var(--critical); border-color:var(--critical);}
+  .b-approved{color:var(--good); border-color:var(--good);}
+  .b-rejected{color:var(--bad); border-color:var(--bad);}
+
+  .pri-critical{color:var(--bad); font-weight:600;}
+  .pri-standard{color:var(--text);}
+  .pri-low{color:var(--muted);}
+
+  .rowbtns{display:flex; gap:6px;}
+  .rowbtns button{padding:4px 8px; font-size:12px;}
+
+  .empty{
+    margin:40px 16px;
+    text-align:center;
+    color:var(--muted);
+    border:1px dashed var(--border-strong);
+    padding:40px 16px;
+  }
+
+  .overlay{
+    position:fixed; inset:0;
+    background:rgba(10,12,15,0.7);
+    display:none;
+    align-items:flex-start;
+    justify-content:center;
+    padding:40px 16px;
+    overflow:auto;
+    z-index:50;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:var(--panel);
+    border:1px solid var(--border-strong);
+    width:100%;
+    max-width:560px;
+  }
+  .modal-head{
+    padding:14px 18px;
+    border-bottom:1px solid var(--border-strong);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .modal-head h3{margin:0; font-size:15px; font-weight:600;}
+  .modal-body{padding:18px; display:grid; gap:12px;}
+  .modal-foot{
+    padding:14px 18px;
+    border-top:1px solid var(--border-strong);
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+  }
+  .field label{
+    display:block; font-size:11px; color:var(--muted);
+    letter-spacing:.03em; margin-bottom:5px;
+  }
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .x{background:none;border:none;color:var(--muted);font-size:18px;padding:0 4px;}
+  .x:hover{color:var(--bad); border:none;}
+
+  .footer-note{
+    margin:0 16px 30px;
+    color:var(--muted);
+    font-size:11.5px;
+    border-top:1px solid var(--border);
+    padding-top:12px;
+  }
+
+  /* small helper for date entry */
+  .date-hint{
+    font-size:10px;
+    color:var(--muted);
+    margin-top:2px;
+  }
+
+  @media(max-width:800px){
+    .titleblock{grid-template-columns:1fr 1fr;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .field-row{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="titleblock">
+    <div class="tb-main">
+      <div>
+        <div class="tb-title">Vendor Package Register</div>
+        <div class="tb-sub">Document control &amp; review tracker — runs entirely in this browser, no server required</div>
+      </div>
+      <div class="btnrow">
+        <button class="ghost" id="btnDriveMap">⚙ Drive Mappings</button>
+        <button class="ghost" id="btnExportJson">Export JSON</button>
+        <button class="ghost" id="btnExportExcel">Export Excel</button>
+        <button class="ghost" id="btnImport">Import</button>
+        <input type="file" id="fileImport" accept="application/json" style="display:none;">
+      </div>
+    </div>
+
+    <div class="tb-cell">
+      <div class="tb-label">PROJECT</div>
+      <div class="btnrow" style="gap:6px;">
+        <select id="projectSelect" style="width:auto; flex:1;"></select>
+        <button id="btnNewProject" title="New project">+</button>
+        <button id="btnRenameProject" title="Rename">✎</button>
+        <button class="danger" id="btnDeleteProject" title="Delete project">🗑</button>
+      </div>
+    </div>
+    <div class="tb-cell" style="grid-column: span 2;">
+      <div class="tb-label">DEFAULT PROJECT FOLDER (OPTIONAL — INDIVIDUAL PACKAGES CAN OVERRIDE BELOW)</div>
+      <div class="folder-row">
+        <input type="text" id="folderPath" placeholder="e.g. C:\Projects\ZFI2.5\Vendor Packages  or  \\server\share\Vendor Packages">
+        <a id="folderOpen" href="#" target="_blank" rel="noopener"><button>Open Folder</button></a>
+        <button id="folderCopy">Copy Path</button>
+      </div>
+    </div>
+    <div class="tb-cell">
+      <div class="tb-label">TODAY</div>
+      <div class="mono" id="todayDate"></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">TOTAL PACKAGES</div></div>
+    <div class="stat"><div class="num" id="statPending">0</div><div class="lbl">PENDING / IN REVIEW</div></div>
+    <div class="stat warn"><div class="num" id="statOverdue">0</div><div class="lbl">OVERDUE</div></div>
+    <div class="stat"><div class="num" id="statCritical">0</div><div class="lbl">CRITICAL PRIORITY OPEN</div></div>
+    <div class="stat"><div class="num" id="statApproved">0</div><div class="lbl">APPROVED</div></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="filters">
+      <input type="text" id="searchBox" placeholder="Search vendor / document / remarks..." style="min-width:220px;">
+      <select id="filterStatus">
+        <option value="">All statuses</option>
+        <option>Pending</option>
+        <option>In Review</option>
+        <option>Commented</option>
+        <option>Resubmission Required</option>
+        <option>Approved</option>
+        <option>Rejected</option>
+      </select>
+      <select id="filterPriority">
+        <option value="">All priorities</option>
+        <option>Critical</option>
+        <option>Standard</option>
+        <option>Low</option>
+      </select>
+      <select id="filterCategory">
+        <option value="">All categories</option>
+      </select>
+      <label style="display:flex; align-items:center; gap:6px; color:var(--muted); font-size:12.5px;">
+        <input type="checkbox" id="filterOverdueOnly" style="width:auto;"> Overdue only
+      </label>
+    </div>
+    <button class="primary" id="btnAddPackage">+ Add Package</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th data-sort="vendor">Vendor</th>
+        <th data-sort="docName">Document / Package</th>
+        <th data-sort="category">Category</th>
+        <th data-sort="rev">Rev</th>
+        <th data-sort="received">Received</th>
+        <th data-sort="due">Due</th>
+        <th data-sort="status">Status</th>
+        <th data-sort="priority">Priority</th>
+        <th>Remarks</th>
+        <th>Folder</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <div class="empty" id="emptyState" style="display:none;">
+    No vendor packages logged for this project yet.<br><br>
+    <button class="primary" id="btnAddPackageEmpty">+ Add first package</button>
+  </div>
+
+  <div class="footer-note">
+    All data is stored locally in this browser (localStorage), per project. Nothing is sent anywhere.
+    To share this register or keep a backup, use <b>Export JSON</b> (full backup, re-importable) or <b>Export Excel</b> (formatted Excel workbook).
+    The folder link opens local or network paths directly — if your browser blocks it, use <b>Copy Path</b> and paste into File Explorer.
+    Mapped drive letters (X:\...) are specific to each PC — set them up once under <b>⚙ Drive Mappings</b> so links resolve to the real network (UNC) path everywhere.
+  </div>
+
+</div>
+
+<!-- Drive mapping modal -->
+<div class="overlay" id="driveOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Drive Mappings</h3>
+      <button class="x" id="driveModalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="color:var(--muted); font-size:12.5px; margin-bottom:4px;">
+        Map each mapped drive letter to its real network (UNC) path. Once set, any path typed as <span class="mono">X:\...</span> resolves to <span class="mono">\\server\share\...</span> automatically when opened or copied — so it works from any PC, not just yours.
+        Find the UNC path via <span class="mono">net use</span> in Command Prompt, or right-click the drive in File Explorer → Properties.
+      </div>
+      <div id="driveMapList" style="display:grid; gap:8px;"></div>
+      <div class="field-row" style="align-items:end;">
+        <div class="field">
+          <label>Drive letter</label>
+          <input type="text" id="dm_letter" maxlength="1" placeholder="X">
+        </div>
+        <div class="field">
+          <label>Network (UNC) path</label>
+          <input type="text" id="dm_unc" placeholder="\\server\ShareName">
+        </div>
+      </div>
+      <button id="dm_add" style="justify-self:start;">+ Add mapping</button>
+    </div>
+    <div class="modal-foot">
+      <button class="primary" id="driveModalDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Main Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">Add Package</h3>
+      <button class="x" id="modalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field">
+          <label>Vendor</label>
+          <input type="text" id="f_vendor" list="vendorList" placeholder="e.g. Hangyang, Sulzer, TMEIC">
+          <datalist id="vendorList"></datalist>
+        </div>
+        <div class="field">
+          <label>Category</label>
+          <input type="text" id="f_category" list="categoryList" placeholder="e.g. Datasheet, GA Drawing, QAP, MR">
+          <datalist id="categoryList">
+            <option>Datasheet</option>
+            <option>GA Drawing</option>
+            <option>MR</option>
+            <option>QAP</option>
+            <option>Technical Specification</option>
+            <option>Isometric</option>
+            <option>Vendor Print</option>
+            <option>CRS</option>
+          </datalist>
+        </div>
+      </div>
+      <div class="field">
+        <label>Document / Package name</label>
+        <input type="text" id="f_docName" placeholder="e.g. Strainer Datasheet Rev B">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Revision</label>
+          <input type="text" id="f_rev" placeholder="e.g. B">
+        </div>
+        <div class="field">
+          <label>Priority</label>
+          <select id="f_priority">
+            <option>Standard</option>
+            <option>Critical</option>
+            <option>Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Received date</label>
+          <input type="text" id="f_received" placeholder="DD-MM-YYYY" pattern="\d{2}-\d{2}-\d{4}" title="Enter date as DD-MM-YYYY">
+          <div class="date-hint">e.g. 31-12-2025</div>
+        </div>
+        <div class="field">
+          <label>Review due date</label>
+          <input type="text" id="f_due" placeholder="DD-MM-YYYY" pattern="\d{2}-\d{2}-\d{4}" title="Enter date as DD-MM-YYYY">
+          <div class="date-hint">e.g. 31-12-2025</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="f_status">
+          <option>Pending</option>
+          <option>In Review</option>
+          <option>Commented</option>
+          <option>Resubmission Required</option>
+          <option>Approved</option>
+          <option>Rejected</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Remarks</label>
+        <textarea id="f_remarks" rows="3" placeholder="Notes, comment sheet reference, follow-up owner..."></textarea>
+      </div>
+      <div class="field">
+        <label>Folder path for this package (leave blank to use project default)</label>
+        <div class="folder-row">
+          <input type="text" id="f_folderPath" placeholder="e.g. C:\Projects\ZFI2.5\Vendor Packages\Sulzer\UHP Ammonia">
+          <button type="button" id="f_folderCopy">Copy</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="ghost" id="modalCancel">Cancel</button>
+      <button class="primary" id="modalSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var STORE_KEY = "vendorPackageRegisterV1";
+  var state = load() || seedState();
+  if(!state.driveMap) state.driveMap = {};
+  state.driveMap["X"] = "\\\\192.168.5.44\\users data-2\\Hydrogen\\";
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e){}
+  var editingId = null;
+  var sortKey = "due", sortDir = 1;
+
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+  function seedState(){
+    var pid = uid();
+    return {
+      activeProject: pid,
+      driveMap: { "X": "\\\\192.168.5.44\\users data-2\\Hydrogen\\" },
+      projects: {
+        [pid]: { name: "Sample Project", folderPath: "", packages: [] }
+      }
+    };
+  }
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(STORE_KEY);
+      if(!raw) return null;
+      var parsed = JSON.parse(raw);
+      if(!parsed.projects || !Object.keys(parsed.projects).length) return null;
+      if(!parsed.driveMap) parsed.driveMap = {};
+      parsed.driveMap["X"] = "\\\\192.168.5.44\\users data-2\\Hydrogen\\";
+      return parsed;
+    }catch(e){ return null; }
+  }
+
+  function save(){
+    localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  }
+
+  function activeProject(){
+    return state.projects[state.activeProject];
+  }
+
+  // ---------- Date formatting helpers ----------
+  function formatDateForDisplay(dateStr){
+    if(!dateStr) return "";
+    var parts = dateStr.split("-");
+    if(parts.length !== 3) return dateStr;
+    var y = parts[0], m = parts[1], d = parts[2];
+    return d + "-" + m + "-" + y;
+  }
+
+  function parseDateInput(str){
+    // Expect DD-MM-YYYY, return YYYY-MM-DD or null if invalid
+    var trimmed = str.trim();
+    if(!trimmed) return null;
+    var parts = trimmed.split("-");
+    if(parts.length !== 3) return null;
+    var d = parseInt(parts[0], 10);
+    var m = parseInt(parts[1], 10);
+    var y = parseInt(parts[2], 10);
+    if(isNaN(d) || isNaN(m) || isNaN(y)) return null;
+    if(m < 1 || m > 12 || d < 1 || d > 31) return null;
+    // Basic check: if date is invalid like 31-02-2025, Date will auto-correct, but we want to reject.
+    var dateObj = new Date(y, m-1, d);
+    if(dateObj.getFullYear() !== y || dateObj.getMonth() !== m-1 || dateObj.getDate() !== d) return null;
+    var mm = String(m).padStart(2,"0");
+    var dd = String(d).padStart(2,"0");
+    return y + "-" + mm + "-" + dd;
+  }
+
+  function getTodayFormatted(){
+    var now = new Date();
+    var dd = String(now.getDate()).padStart(2,"0");
+    var mm = String(now.getMonth()+1).padStart(2,"0");
+    var yyyy = now.getFullYear();
+    return dd + "-" + mm + "-" + yyyy;
+  }
+
+  // ---------- Project controls ----------
+  var projectSelect = document.getElementById("projectSelect");
+  var folderPath = document.getElementById("folderPath");
+  var folderOpen = document.getElementById("folderOpen");
+
+  function renderProjectSelect(){
+    projectSelect.innerHTML = "";
+    Object.keys(state.projects).forEach(function(pid){
+      var opt = document.createElement("option");
+      opt.value = pid;
+      opt.textContent = state.projects[pid].name;
+      if(pid === state.activeProject) opt.selected = true;
+      projectSelect.appendChild(opt);
+    });
+  }
+
+  function resolvePath(path){
+    if(!path) return "";
+    var p = path.trim().replace(/[/]+/g, "\\");
+    var m = p.match(/^([A-Za-z]):[\\\/]?(.*)$/);
+    if(m){
+      var letter = m[1].toUpperCase();
+      var rest = (m[2] || "").replace(/^[\\\/]+/, "").trim();
+      var unc = state.driveMap[letter];
+      if(unc){
+        var uncClean = unc.trim().replace(/[\\\/]+$/, "");
+        return rest ? (uncClean + "\\" + rest) : (uncClean + "\\");
+      }
+    }
+    return p;
+  }
+
+  function ensureFolderSlash(path){
+    if(!path) return "";
+    if(/[\\\/]$/.test(path)) return path;
+    var last = path.split(/[\\\/]/).pop() || "";
+    if(!/\.[A-Za-z0-9]{1,8}$/.test(last)) return path + "\\";
+    return path;
+  }
+
+  function toFileHref(path){
+    if(!path) return "#";
+    var resolved = resolvePath(path).trim();
+    if(/^https?:\/\//i.test(resolved)) return resolved;
+    if(/^file:\/\//i.test(resolved)) return resolved;
+    if(/^\\\\/.test(resolved) || /^[a-zA-Z]:\\/.test(resolved)){
+      return "search-ms:displayname=" + encodeURIComponent("Open Folder") +
+             "&crumb=location:" + encodeURIComponent(resolved);
+    }
+    if(/^\//.test(resolved)){
+      return "file://" + resolved.split("/").map(encodeURIComponent).join("/");
+    }
+    return resolved;
+  }
+
+  function refreshFolderUI(){
+    var proj = activeProject();
+    folderPath.value = proj.folderPath || "";
+    folderOpen.setAttribute("href", toFileHref(ensureFolderSlash(resolvePath(proj.folderPath))));
+  }
+
+  folderPath.addEventListener("change", function(){
+    activeProject().folderPath = folderPath.value.trim();
+    save();
+    refreshFolderUI();
+  });
+
+  document.getElementById("folderCopy").addEventListener("click", function(){
+    var val = ensureFolderSlash(resolvePath(folderPath.value.trim()));
+    if(!val) return;
+    navigator.clipboard.writeText(val).then(function(){
+      var btn = document.getElementById("folderCopy");
+      var orig = btn.textContent;
+      btn.textContent = "Copied ✓";
+      setTimeout(function(){ btn.textContent = orig; }, 1200);
+    });
+  });
+
+  projectSelect.addEventListener("change", function(){
+    state.activeProject = projectSelect.value;
+    save();
+    refreshFolderUI();
+    renderTable();
+  });
+
+  document.getElementById("btnNewProject").addEventListener("click", function(){
+    var name = prompt("New project name:");
+    if(!name) return;
+    var pid = uid();
+    state.projects[pid] = { name: name.trim(), folderPath: "", packages: [] };
+    state.activeProject = pid;
+    save();
+    renderProjectSelect();
+    refreshFolderUI();
+    renderTable();
+  });
+
+  document.getElementById("btnRenameProject").addEventListener("click", function(){
+    var proj = activeProject();
+    var name = prompt("Rename project:", proj.name);
+    if(!name) return;
+    proj.name = name.trim();
+    save();
+    renderProjectSelect();
+  });
+
+  document.getElementById("btnDeleteProject").addEventListener("click", function(){
+    var ids = Object.keys(state.projects);
+    if(ids.length <= 1){ alert("At least one project must remain."); return; }
+    var proj = activeProject();
+    if(!confirm('Delete project "' + proj.name + '" and all its package records? This cannot be undone.')) return;
+    delete state.projects[state.activeProject];
+    state.activeProject = Object.keys(state.projects)[0];
+    save();
+    renderProjectSelect();
+    refreshFolderUI();
+    renderTable();
+  });
+
+  // ---------- Filters ----------
+  var searchBox = document.getElementById("searchBox");
+  var filterStatus = document.getElementById("filterStatus");
+  var filterPriority = document.getElementById("filterPriority");
+  var filterCategory = document.getElementById("filterCategory");
+  var filterOverdueOnly = document.getElementById("filterOverdueOnly");
+  [searchBox, filterStatus, filterPriority, filterCategory, filterOverdueOnly].forEach(function(el){
+    el.addEventListener("input", renderTable);
+    el.addEventListener("change", renderTable);
+  });
+
+  document.querySelectorAll("th[data-sort]").forEach(function(th){
+    th.addEventListener("click", function(){
+      var k = th.getAttribute("data-sort");
+      if(sortKey === k){ sortDir *= -1; } else { sortKey = k; sortDir = 1; }
+      renderTable();
+    });
+  });
+
+  function isOverdue(pkg){
+    if(!pkg.due) return false;
+    if(pkg.status === "Approved" || pkg.status === "Rejected") return false;
+    var today = new Date(); today.setHours(0,0,0,0);
+    var due = new Date(pkg.due + "T00:00:00");
+    return due < today;
+  }
+
+  function badgeClass(status){
+    return {
+      "Pending":"b-pending",
+      "In Review":"b-review",
+      "Commented":"b-comment",
+      "Resubmission Required":"b-resub",
+      "Approved":"b-approved",
+      "Rejected":"b-rejected"
+    }[status] || "b-pending";
+  }
+  function priClass(p){
+    return {"Critical":"pri-critical","Standard":"pri-standard","Low":"pri-low"}[p] || "pri-standard";
+  }
+
+  function updateCategoryFilterOptions(){
+    var proj = activeProject();
+    var cats = Array.from(new Set(proj.packages.map(function(p){return p.category;}).filter(Boolean))).sort();
+    var current = filterCategory.value;
+    filterCategory.innerHTML = '<option value="">All categories</option>';
+    cats.forEach(function(c){
+      var o = document.createElement("option"); o.textContent = c; o.value = c;
+      filterCategory.appendChild(o);
+    });
+    filterCategory.value = cats.includes(current) ? current : "";
+  }
+
+  function updateVendorDatalist(){
+    var allVendors = new Set();
+    Object.values(state.projects).forEach(function(p){
+      p.packages.forEach(function(pkg){ if(pkg.vendor) allVendors.add(pkg.vendor); });
+    });
+    var dl = document.getElementById("vendorList");
+    dl.innerHTML = "";
+    Array.from(allVendors).sort().forEach(function(v){
+      var o = document.createElement("option"); o.value = v; dl.appendChild(o);
+    });
+  }
+
+  function renderTable(){
+    var proj = activeProject();
+    updateCategoryFilterOptions();
+
+    var rows = proj.packages.slice();
+
+    var q = searchBox.value.trim().toLowerCase();
+    if(q){
+      rows = rows.filter(function(p){
+        return (p.vendor||"").toLowerCase().includes(q) ||
+               (p.docName||"").toLowerCase().includes(q) ||
+               (p.remarks||"").toLowerCase().includes(q);
+      });
+    }
+    if(filterStatus.value) rows = rows.filter(function(p){ return p.status === filterStatus.value; });
+    if(filterPriority.value) rows = rows.filter(function(p){ return p.priority === filterPriority.value; });
+    if(filterCategory.value) rows = rows.filter(function(p){ return p.category === filterCategory.value; });
+    if(filterOverdueOnly.checked) rows = rows.filter(isOverdue);
+
+    rows.sort(function(a,b){
+      var av = (a[sortKey]||"").toString().toLowerCase();
+      var bv = (b[sortKey]||"").toString().toLowerCase();
+      if(av < bv) return -1*sortDir;
+      if(av > bv) return 1*sortDir;
+      return 0;
+    });
+
+    var tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+    document.getElementById("emptyState").style.display = proj.packages.length ? "none" : "block";
+
+    rows.forEach(function(pkg){
+      var tr = document.createElement("tr");
+      if(isOverdue(pkg)) tr.className = "overdue";
+      tr.innerHTML =
+        '<td>' + esc(pkg.vendor) + '</td>' +
+        '<td>' + esc(pkg.docName) + '</td>' +
+        '<td>' + esc(pkg.category) + '</td>' +
+        '<td class="mono">' + esc(pkg.rev) + '</td>' +
+        '<td class="mono">' + esc(formatDateForDisplay(pkg.received)) + '</td>' +
+        '<td class="mono">' + esc(formatDateForDisplay(pkg.due)) + (isOverdue(pkg) ? ' <span style="color:var(--bad); font-size:11px;">OVERDUE</span>' : '') + '</td>' +
+        '<td><span class="badge ' + badgeClass(pkg.status) + '">' + esc(pkg.status) + '</span></td>' +
+        '<td class="' + priClass(pkg.priority) + '">' + esc(pkg.priority) + '</td>' +
+        '<td>' + esc(pkg.remarks) + '</td>' +
+        '<td>' + folderCell(pkg, proj) + '</td>' +
+        '<td><div class="rowbtns"><button data-edit="'+pkg.id+'">Edit</button><button class="danger" data-del="'+pkg.id+'">Del</button></div></td>';
+      tbody.appendChild(tr);
+    });
+
+    tbody.querySelectorAll("[data-edit]").forEach(function(btn){
+      btn.addEventListener("click", function(){ openModal(btn.getAttribute("data-edit")); });
+    });
+    tbody.querySelectorAll("[data-del]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        if(confirm("Delete this package record?")){
+          var id = btn.getAttribute("data-del");
+          proj.packages = proj.packages.filter(function(p){ return p.id !== id; });
+          save();
+          renderTable();
+          renderStats();
+        }
+      });
+    });
+    tbody.querySelectorAll("[data-copy]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var val = btn.getAttribute("data-copy");
+        navigator.clipboard.writeText(val);
+        var orig = btn.textContent;
+        btn.textContent = "✓";
+        setTimeout(function(){ btn.textContent = orig; }, 1000);
+      });
+    });
+
+    renderStats();
+  }
+
+  function renderStats(){
+    var proj = activeProject();
+    var pkgs = proj.packages;
+    var total = pkgs.length;
+    var openStatuses = ["Pending","In Review","Commented","Resubmission Required"];
+    var pending = pkgs.filter(function(p){ return openStatuses.includes(p.status); }).length;
+    var overdue = pkgs.filter(isOverdue).length;
+    var critical = pkgs.filter(function(p){ return p.priority === "Critical" && openStatuses.includes(p.status); }).length;
+    var approved = pkgs.filter(function(p){ return p.status === "Approved"; }).length;
+
+    document.getElementById("statTotal").textContent = total;
+    document.getElementById("statPending").textContent = pending;
+    document.getElementById("statOverdue").textContent = overdue;
+    document.getElementById("statCritical").textContent = critical;
+    document.getElementById("statApproved").textContent = approved;
+  }
+
+  function folderCell(pkg, proj){
+    var path = pkg.folderPath || proj.folderPath || "";
+    if(!path) return '<span style="color:var(--muted); font-size:12px;">—</span>';
+    var isOverride = !!pkg.folderPath;
+    var resolved = ensureFolderSlash(resolvePath(path));
+    var href = toFileHref(resolved);
+    var label = isOverride ? "Open" : "Open (default)";
+    var mapped = resolved !== path.trim();
+    return '<div class="rowbtns">' +
+      '<a href="' + esc(href) + '" target="_blank" rel="noopener"><button title="' + esc(resolved) + (mapped ? ' (resolved from ' + esc(path) + ')' : '') + '">' + label + '</button></a>' +
+      '<button data-copy="' + esc(resolved) + '" title="Copy network path">Copy</button>' +
+      (mapped ? '<span style="color:var(--good); font-size:11px; align-self:center;" title="Using UNC mapping">🔗</span>' : '') +
+      '</div>';
+  }
+
+  function esc(s){
+    if(s === undefined || s === null) return "";
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  // ---------- Modal ----------
+  var overlay = document.getElementById("overlay");
+  var modalTitle = document.getElementById("modalTitle");
+  var f_received = document.getElementById("f_received");
+  var f_due = document.getElementById("f_due");
+
+  document.getElementById("f_folderCopy").addEventListener("click", function(){
+    var val = ensureFolderSlash(resolvePath(document.getElementById("f_folderPath").value.trim()));
+    if(!val) return;
+    navigator.clipboard.writeText(val);
+    var btn = document.getElementById("f_folderCopy");
+    var orig = btn.textContent;
+    btn.textContent = "Copied ✓";
+    setTimeout(function(){ btn.textContent = orig; }, 1200);
+  });
+
+  function openModal(id){
+    editingId = id || null;
+    modalTitle.textContent = id ? "Edit Package" : "Add Package";
+    var proj = activeProject();
+    var pkg = id ? proj.packages.find(function(p){ return p.id === id; }) : null;
+    document.getElementById("f_vendor").value = pkg ? pkg.vendor : "";
+    document.getElementById("f_category").value = pkg ? pkg.category : "";
+    document.getElementById("f_docName").value = pkg ? pkg.docName : "";
+    document.getElementById("f_rev").value = pkg ? pkg.rev : "";
+    document.getElementById("f_priority").value = pkg ? pkg.priority : "Standard";
+    // display dates in DD-MM-YYYY
+    f_received.value = pkg ? formatDateForDisplay(pkg.received) : "";
+    f_due.value = pkg ? formatDateForDisplay(pkg.due) : "";
+    document.getElementById("f_status").value = pkg ? pkg.status : "Pending";
+    document.getElementById("f_remarks").value = pkg ? pkg.remarks : "";
+    document.getElementById("f_folderPath").value = pkg ? (pkg.folderPath || "") : "";
+    updateVendorDatalist();
+    overlay.classList.add("open");
+    document.getElementById("f_vendor").focus();
+  }
+
+  function closeModal(){ overlay.classList.remove("open"); editingId = null; }
+
+  document.getElementById("btnAddPackage").addEventListener("click", function(){ openModal(null); });
+  document.getElementById("btnAddPackageEmpty").addEventListener("click", function(){ openModal(null); });
+  document.getElementById("modalClose").addEventListener("click", closeModal);
+  document.getElementById("modalCancel").addEventListener("click", closeModal);
+  overlay.addEventListener("click", function(e){ if(e.target === overlay) closeModal(); });
+
+  document.getElementById("modalSave").addEventListener("click", function(){
+    var docName = document.getElementById("f_docName").value.trim();
+    var vendor = document.getElementById("f_vendor").value.trim();
+    if(!docName || !vendor){ alert("Vendor and Document/Package name are required."); return; }
+
+    // Parse dates from DD-MM-YYYY to YYYY-MM-DD
+    var receivedStr = f_received.value.trim();
+    var dueStr = f_due.value.trim();
+    var received = receivedStr ? parseDateInput(receivedStr) : "";
+    var due = dueStr ? parseDateInput(dueStr) : "";
+
+    if(receivedStr && !received){ alert("Invalid Received date. Use DD-MM-YYYY format."); return; }
+    if(dueStr && !due){ alert("Invalid Due date. Use DD-MM-YYYY format."); return; }
+
+    var proj = activeProject();
+    var data = {
+      vendor: vendor,
+      category: document.getElementById("f_category").value.trim(),
+      docName: docName,
+      rev: document.getElementById("f_rev").value.trim(),
+      priority: document.getElementById("f_priority").value,
+      received: received,
+      due: due,
+      status: document.getElementById("f_status").value,
+      remarks: document.getElementById("f_remarks").value.trim(),
+      folderPath: document.getElementById("f_folderPath").value.trim()
+    };
+
+    if(editingId){
+      var idx = proj.packages.findIndex(function(p){ return p.id === editingId; });
+      proj.packages[idx] = Object.assign({id: editingId}, data);
+    } else {
+      data.id = uid();
+      proj.packages.push(data);
+    }
+    save();
+    closeModal();
+    renderTable();
+  });
+
+  // ---------- Export / Import ----------
+  document.getElementById("btnExportJson").addEventListener("click", function(){
+    var blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+    downloadBlob(blob, "vendor-package-register-backup.json");
+  });
+
+  document.getElementById("btnExportExcel").addEventListener("click", async function(){
+    var proj = activeProject();
+    var btn = document.getElementById("btnExportExcel");
+    var originalText = btn.textContent;
+
+    if(typeof ExcelJS === "undefined"){
+      alert("Excel export library could not be loaded. Please check your internet connection and try again.");
+      return;
+    }
+
+    try{
+      btn.disabled = true;
+      btn.textContent = "Preparing Excel…";
+
+      var wb = new ExcelJS.Workbook();
+      wb.creator = "Vendor Package Register";
+      wb.created = new Date();
+
+      var ws = wb.addWorksheet("Package Register", {
+        views: [{state:"frozen", ySplit:3}]
+      });
+
+      var today = new Date();
+      var dd = String(today.getDate()).padStart(2,"0");
+      var mm = String(today.getMonth()+1).padStart(2,"0");
+      var yyyy = today.getFullYear();
+      var dateText = dd + "-" + mm + "-" + yyyy;
+
+      ws.mergeCells("A1:K1");
+      var title = ws.getCell("A1");
+      title.value = "VENDOR PACKAGE REGISTER — " + (proj.name || "PROJECT") + " — " + dateText;
+      title.font = {name:"Arial", size:16, bold:true, color:{argb:"FFFFFFFF"}};
+      title.fill = {type:"pattern", pattern:"solid", fgColor:{argb:"FF17365D"}};
+      title.alignment = {horizontal:"center", vertical:"middle"};
+      ws.getRow(1).height = 30;
+
+      var headers = [
+        "Sr. No.","Vendor","Category","Document / Package","Rev.","Priority",
+        "Received","Due","Status","Remarks","Folder Path"
+      ];
+      var headerRow = ws.getRow(3);
+      headers.forEach(function(h,i){
+        var c = headerRow.getCell(i+1);
+        c.value = h;
+        c.font = {name:"Arial", size:10, bold:true, color:{argb:"FFFFFFFF"}};
+        c.fill = {type:"pattern", pattern:"solid", fgColor:{argb:"FF2F75B5"}};
+        c.alignment = {horizontal:"center", vertical:"middle", wrapText:true};
+        c.border = {
+          top:{style:"thin",color:{argb:"FFD9E2F3"}},
+          bottom:{style:"thin",color:{argb:"FFD9E2F3"}},
+          left:{style:"thin",color:{argb:"FFD9E2F3"}},
+          right:{style:"thin",color:{argb:"FFD9E2F3"}}
+        };
+      });
+      headerRow.height = 34;
+
+      proj.packages.forEach(function(p, idx){
+        var row = ws.addRow([
+          idx + 1,
+          p.vendor || "",
+          p.category || "",
+          p.docName || "",
+          p.rev || "",
+          p.priority || "",
+          formatDateForDisplay(p.received),
+          formatDateForDisplay(p.due),
+          p.status || "",
+          p.remarks || "",
+          p.folderPath || proj.folderPath || ""
+        ]);
+
+        row.eachCell({includeEmpty:true}, function(cell, col){
+          cell.font = {name:"Arial", size:10, color:{argb:"FF222222"}};
+          cell.alignment = {
+            horizontal: [1,2,3,5,6,7,8,9].includes(col) ? "center" : "left",
+            vertical: "top",
+            wrapText: true
+          };
+          cell.border = {
+            bottom:{style:"thin",color:{argb:"FFD9E2F3"}},
+            right:{style:"thin",color:{argb:"FFD9E2F3"}}
+          };
+          if(idx % 2 === 1){
+            cell.fill = {type:"pattern", pattern:"solid", fgColor:{argb:"FFF4F8FC"}};
+          }
+        });
+
+        var statusCell = row.getCell(9);
+        var status = String(p.status || "");
+        if(status === "Pending"){
+          statusCell.fill = {type:"pattern", pattern:"solid", fgColor:{argb:"FFFFF2CC"}};
+        }else if(status === "Approved"){
+          statusCell.fill = {type:"pattern", pattern:"solid", fgColor:{argb:"FFE2F0D9"}};
+        }
+      });
+
+      [9,20,14,30,9,12,14,14,14,58,32].forEach(function(w,i){
+        ws.getColumn(i+1).width = w;
+      });
+
+      ws.autoFilter = {
+        from: "A3",
+        to: "K" + Math.max(3, ws.rowCount)
+      };
+      ws.pageSetup = {
+        orientation: "landscape",
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0,
+        paperSize: 9
+      };
+      ws.pageMargins = {
+        left:0.25, right:0.25, top:0.4, bottom:0.4,
+        header:0.2, footer:0.2
+      };
+      ws.printTitlesRow = "1:3";
+
+      var buffer = await wb.xlsx.writeBuffer();
+      var blob = new Blob([buffer], {
+        type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      });
+
+      var safeName = (proj.name || "project")
+        .replace(/[<>:"/\\|?*]/g, "_")
+        .replace(/\s+/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_+|_+$/g, "");
+
+      downloadBlob(blob, safeName + "_Vendor_Package_Register_" + dateText + ".xlsx");
+    }catch(err){
+      console.error(err);
+      alert("Excel export failed: " + (err && err.message ? err.message : err));
+    }finally{
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  });
+
+  function downloadBlob(blob, filename){
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById("btnImport").addEventListener("click", function(){
+    document.getElementById("fileImport").click();
+  });
+  document.getElementById("fileImport").addEventListener("change", function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      try{
+        var incoming = JSON.parse(evt.target.result);
+        if(!incoming.projects) throw new Error("Not a valid backup file.");
+        Object.keys(incoming.projects).forEach(function(pid){
+          state.projects[pid] = incoming.projects[pid];
+        });
+        if(incoming.driveMap){
+          Object.keys(incoming.driveMap).forEach(function(k){ state.driveMap[k] = incoming.driveMap[k]; });
+        }
+        state.activeProject = incoming.activeProject && state.projects[incoming.activeProject]
+          ? incoming.activeProject
+          : Object.keys(state.projects)[0];
+        save();
+        renderProjectSelect();
+        refreshFolderUI();
+        renderTable();
+        alert("Import complete.");
+      }catch(err){
+        alert("Could not import file: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  });
+
+  // ---------- Drive mappings ----------
+  var driveOverlay = document.getElementById("driveOverlay");
+
+  function renderDriveMapList(){
+    var wrap = document.getElementById("driveMapList");
+    var letters = Object.keys(state.driveMap).sort();
+    if(!letters.length){
+      wrap.innerHTML = '<div style="color:var(--muted); font-size:12.5px;">No drive mappings yet.</div>';
+      return;
+    }
+    wrap.innerHTML = "";
+    letters.forEach(function(letter){
+      var row = document.createElement("div");
+      row.className = "folder-row";
+      row.innerHTML =
+        '<span class="mono" style="width:26px; color:var(--accent); font-weight:600;">' + esc(letter) + ':</span>' +
+        '<input type="text" class="mono" value="' + esc(state.driveMap[letter]) + '" data-letter="' + esc(letter) + '">' +
+        '<button class="danger" data-rmletter="' + esc(letter) + '">Remove</button>';
+      wrap.appendChild(row);
+    });
+    wrap.querySelectorAll("input[data-letter]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        state.driveMap[inp.getAttribute("data-letter")] = inp.value.trim().replace(/[\\\/]+$/, "") + "\\";
+        save();
+        renderTable();
+      });
+    });
+    wrap.querySelectorAll("[data-rmletter]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        delete state.driveMap[btn.getAttribute("data-rmletter")];
+        save();
+        renderDriveMapList();
+        renderTable();
+      });
+    });
+  }
+
+  document.getElementById("btnDriveMap").addEventListener("click", function(){
+    renderDriveMapList();
+    driveOverlay.classList.add("open");
+  });
+  document.getElementById("driveModalClose").addEventListener("click", function(){ driveOverlay.classList.remove("open"); });
+  document.getElementById("driveModalDone").addEventListener("click", function(){ driveOverlay.classList.remove("open"); });
+  driveOverlay.addEventListener("click", function(e){ if(e.target === driveOverlay) driveOverlay.classList.remove("open"); });
+
+  document.getElementById("dm_add").addEventListener("click", function(){
+    var letter = document.getElementById("dm_letter").value.trim().toUpperCase().replace(/[^A-Z]/g,"");
+    var unc = document.getElementById("dm_unc").value.trim();
+    if(!letter || !unc){ alert("Enter both a drive letter and a network path."); return; }
+    state.driveMap[letter] = unc.replace(/[\\\/]+$/, "") + "\\";
+    document.getElementById("dm_letter").value = "";
+    document.getElementById("dm_unc").value = "";
+    save();
+    renderDriveMapList();
+    renderTable();
+  });
+
+  // ---------- Init ----------
+  document.getElementById("todayDate").textContent = getTodayFormatted();
+  renderProjectSelect();
+  refreshFolderUI();
+  updateVendorDatalist();
+  renderTable();
+
+})();
+</script>
+</body>
+</html>

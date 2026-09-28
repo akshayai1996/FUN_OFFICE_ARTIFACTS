@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Signature Studio V2</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--ink:#17202a;--muted:#687385;--line:#d8dee7;--blue:#2563eb;--blue2:#eff6ff}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#eef2f7,#fbfcfd);font-family:Segoe UI,Arial,sans-serif;color:var(--ink)}
+.wrap{max-width:1250px;margin:25px auto;padding:0 16px}.top{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:18px}
+h1{margin:0;font-size:29px}.sub{color:var(--muted);margin-top:5px}.badge{border:1px solid var(--line);background:#fff;padding:8px 12px;border-radius:20px;font-size:12px}
+.grid{display:grid;grid-template-columns:390px 1fr;gap:18px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 7px 25px #0000000a}
+label{display:block;font-size:13px;font-weight:700;margin:0 0 7px}input[type=text],select{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.field{margin-bottom:15px}.styles{display:grid;grid-template-columns:1fr 1fr;gap:7px;max-height:430px;overflow:auto;padding:2px}
+.style{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px;cursor:pointer;text-align:left;min-width:0}.style.active{border:2px solid var(--blue);padding:8px;background:var(--blue2)}
+.style span{display:block;font-size:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.style small{color:var(--muted)}
+
+/* Natural handwriting simulation transformations */
+.s1{font-family:"Brush Script MT","Segoe Script",cursive}
+.s2{font-family:"Lucida Handwriting","Brush Script MT",cursive;font-style:italic}
+.s3{font-family:"Segoe Print","Comic Sans MS",cursive}
+.s4{font-family:"URW Chancery L","Apple Chancery",cursive;font-style:italic}
+.s5{font-family:"Bradley Hand","Segoe Print",cursive}
+.s6{font-family:"Monotype Corsiva","Brush Script MT",cursive}
+.s7{font-family:"Kunstler Script","Brush Script MT",cursive}
+.s8{font-family:"Edwardian Script ITC","Monotype Corsiva",cursive}
+.s9{font-family:"Vladimir Script","Brush Script MT",cursive}
+.s10{font-family:"French Script MT","Monotype Corsiva",cursive}
+.s11{font-family:"Mistral","Brush Script MT",cursive}
+.s12{font-family:"Rage Italic","Brush Script MT",cursive}
+.s13{font-family:"Segoe Script",cursive;font-weight:600}
+.s14{font-family:"Snell Roundhand","Brush Script MT",cursive}
+.s15{font-family:"Zapfino","Lucida Handwriting",cursive}
+.s16{font-family:"Bickham Script Pro","Edwardian Script ITC",cursive}
+.s17{font-family:"Lucida Calligraphy","Lucida Handwriting",cursive}
+.s18{font-family:cursive;font-style:italic}
+
+/* Procedurally randomized ink-like styles */
+.s19{font-family:"Segoe Script",cursive;transform:skewX(-14deg) rotate(-4deg);display:inline-block}
+.s20{font-family:"Brush Script MT",cursive;transform:skewX(-18deg) scaleY(1.1);display:inline-block}
+.s21{font-family:"Edwardian Script ITC",cursive;transform:skewX(-10deg) rotate(-2deg);display:inline-block}
+.s22{font-family:"Monotype Corsiva",cursive;transform:skewX(-16deg) scale(0.95,1.05);display:inline-block}
+.s23{font-family:"Lucida Handwriting",cursive;transform:skewX(-12deg) rotate(-5deg);display:inline-block}
+.s24{font-family:"URW Chancery L",cursive;transform:skewX(-20deg) rotate(-3deg);display:inline-block}
+.s25{font-family:"Vladimir Script",cursive;transform:skewX(-15deg) scaleY(0.9);display:inline-block}
+.s26{font-family:"Kunstler Script",cursive;transform:skewX(-8deg) rotate(-6deg);display:inline-block}
+.s27{font-family:"French Script MT",cursive;transform:skewX(-12deg) scale(1.05,0.95);display:inline-block}
+.s28{font-family:"Bradley Hand",cursive;transform:skewX(-14deg) rotate(-2deg);display:inline-block}
+.s29{font-family:"Rage Italic",cursive;transform:skewX(-22deg) scaleY(1.15);display:inline-block}
+.s30{font-family:"Snell Roundhand",cursive;transform:skewX(-15deg) rotate(-4deg);display:inline-block}
+
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}button{font:inherit;border:0;border-radius:9px;padding:10px 13px;cursor:pointer;font-weight:700}.primary{background:var(--blue);color:white}.secondary{background:#edf1f5;color:#253142}.danger{background:#fff0f0;color:#bd2626}
+.preview{display:flex;flex-direction:column;min-height:650px}.tabs{display:flex;gap:7px;margin-bottom:12px}.tab{background:#edf1f5}.tab.active{background:var(--blue);color:#fff}
+.panel{display:none}.panel.active{display:block}.canvasbox{border:1px dashed #aeb8c5;border-radius:14px;background:#fff;display:flex;justify-content:center;align-items:center;min-height:420px;overflow:auto;padding:25px}
+#sigCanvas{width:min(100%,1000px);height:auto;background:white}.drawbox{border:2px solid #b8c1cc;border-radius:12px;overflow:hidden;background:white}.drawbox canvas{display:block;width:100%;height:330px;touch-action:none;cursor:crosshair}
+.hint{font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px}.saved{margin-top:15px}.savedRow{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line);padding:8px;border-radius:9px;margin-top:7px}.savedName{font-family:cursive;font-size:20px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.styles{max-height:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top"><div><h1>✍ Signature Studio V2</h1><div class="sub">30 natural ink-fluid variations + freehand signature pad + PNG export</div></div><div class="badge">100% browser-based • No upload</div></div>
+
+<div class="grid">
+<section class="card">
+<div class="field"><label for="name">Name</label><input id="name" type="text" placeholder="Enter your name" autocomplete="off"></div>
+<div class="field"><label>Natural signature styles — 30 options</label>
+<div class="styles">
+<button class="style active" data-style="s1"><span class="s1">Akshay Solanki</span><small>Classic Script</small></button>
+<button class="style" data-style="s2"><span class="s2">Akshay Solanki</span><small>Elegant Hand</small></button>
+<button class="style" data-style="s3"><span class="s3">Akshay Solanki</span><small>Handwritten</small></button>
+<button class="style" data-style="s4"><span class="s4">Akshay Solanki</span><small>Calligraphy</small></button>
+<button class="style" data-style="s5"><span class="s5">Akshay Solanki</span><small>Casual</small></button>
+<button class="style" data-style="s6"><span class="s6">Akshay Solanki</span><small>Formal</small></button>
+<button class="style" data-style="s7"><span class="s7">Akshay Solanki</span><small>Flourish</small></button>
+<button class="style" data-style="s8"><span class="s8">Akshay Solanki</span><small>Luxury Script</small></button>
+<button class="style" data-style="s9"><span class="s9">Akshay Solanki</span><small>Bold Script</small></button>
+<button class="style" data-style="s10"><span class="s10">Akshay Solanki</span><small>Classic Italic</small></button>
+<button class="style" data-style="s11"><span class="s11">Akshay Solanki</span><small>Brush Style</small></button>
+<button class="style" data-style="s12"><span class="s12">Akshay Solanki</span><small>Fast Signature</small></button>
+<button class="style" data-style="s13"><span class="s13">Akshay Solanki</span><small>Modern Script</small></button>
+<button class="style" data-style="s14"><span class="s14">Akshay Solanki</span><small>Snell Flow</small></button>
+<button class="style" data-style="s15"><span class="s15">Akshay Solanki</span><small>Zapf Style</small></button>
+<button class="style" data-style="s16"><span class="s16">Akshay Solanki</span><small>Royal Script</small></button>
+<button class="style" data-style="s17"><span class="s17">Akshay Solanki</span><small>Lucida Script</small></button>
+<button class="style" data-style="s18"><span class="s18">Akshay Solanki</span><small>Natural Cursive</small></button>
+<button class="style" data-style="s19"><span class="s19">Akshay Solanki</span><small>Dynamic Slant A</small></button>
+<button class="style" data-style="s20"><span class="s20">Akshay Solanki</span><small>Dynamic Slant B</small></button>
+<button class="style" data-style="s21"><span class="s21">Akshay Solanki</span><small>Fluid Flow A</small></button>
+<button class="style" data-style="s22"><span class="s22">Akshay Solanki</span><small>Fluid Flow B</small></button>
+<button class="style" data-style="s23"><span class="s23">Akshay Solanki</span><small>Freeform Script A</small></button>
+<button class="style" data-style="s24"><span class="s24">Akshay Solanki</span><small>Freeform Script B</small></button>
+<button class="style" data-style="s25"><span class="s25">Akshay Solanki</span><small>Organic Ink A</small></button>
+<button class="style" data-style="s26"><span class="s26">Akshay Solanki</span><small>Organic Ink B</small></button>
+<button class="style" data-style="s27"><span class="s27">Akshay Solanki</span><small>Expressive Pen A</small></button>
+<button class="style" data-style="s28"><span class="s28">Akshay Solanki</span><small>Expressive Pen B</small></button>
+<button class="style" data-style="s29"><span class="s29">Akshay Solanki</span><small>Rapid Stroke A</small></button>
+<button class="style" data-style="s30"><span class="s30">Akshay Solanki</span><small>Rapid Stroke B</small></button>
+</div></div>
+<div class="field"><label for="size">Typed signature size</label><input id="size" type="range" min="35" max="110" value="68" style="width:100%"></div>
+<div class="controls"><button class="primary" id="save">Save Typed</button><button class="secondary" id="download">Download PNG</button><button class="secondary" id="copy">Copy PNG</button><button class="secondary" id="clear">Clear</button></div>
+<div class="saved"><label>Saved typed signatures</label><div id="savedList"></div></div>
+</section>
+
+<section class="card preview">
+<div class="tabs"><button class="tab active" data-tab="typed">Typed Cursive</button><button class="tab" data-tab="drawn">Draw My Signature</button></div>
+<div id="typed" class="panel active">
+<div class="canvasbox"><canvas id="sigCanvas" width="1100" height="330"></canvas></div>
+<div class="hint">The PNG is generated locally. Use it in PDF-XChange Editor, Word, Excel, etc.</div>
+</div>
+<div id="drawn" class="panel">
+<div class="drawbox"><canvas id="drawCanvas" width="1100" height="500"></canvas></div>
+<div class="controls"><button class="primary" id="saveDrawn">Save Drawing</button><button class="secondary" id="downloadDrawn">Download Drawing PNG</button><button class="secondary" id="undo">Undo</button><button class="secondary" id="clearDrawn">Erase</button></div>
+<div class="hint">Draw with mouse, trackpad, stylus or touchscreen. The exported PNG removes the white background and keeps the signature transparent.</div>
+</div>
+</section>
+</div>
+</div>
+
+<script>
+const sig=document.getElementById('sigCanvas'),ctx=sig.getContext('2d');
+const nameEl=document.getElementById('name'),sizeEl=document.getElementById('size');
+let style='s1';
+const fonts={
+  s1:'"Brush Script MT","Segoe Script",cursive',
+  s2:'"Lucida Handwriting","Brush Script MT",cursive',
+  s3:'"Segoe Print","Comic Sans MS",cursive',
+  s4:'"URW Chancery L","Apple Chancery",cursive',
+  s5:'"Bradley Hand","Segoe Print",cursive',
+  s6:'"Monotype Corsiva","Brush Script MT",cursive',
+  s7:'"Kunstler Script","Brush Script MT",cursive',
+  s8:'"Edwardian Script ITC","Monotype Corsiva",cursive',
+  s9:'"Vladimir Script","Brush Script MT",cursive',
+  s10:'"French Script MT","Monotype Corsiva",cursive',
+  s11:'"Mistral","Brush Script MT",cursive',
+  s12:'"Rage Italic","Brush Script MT",cursive',
+  s13:'"Segoe Script",cursive',
+  s14:'"Snell Roundhand","Brush Script MT",cursive',
+  s15:'"Zapfino","Lucida Handwriting",cursive',
+  s16:'"Bickham Script Pro","Edwardian Script ITC",cursive',
+  s17:'"Lucida Calligraphy","Lucida Handwriting",cursive',
+  s18:'cursive',
+  s19:'"Segoe Script",cursive',
+  s20:'"Brush Script MT",cursive',
+  s21:'"Edwardian Script ITC",cursive',
+  s22:'"Monotype Corsiva",cursive',
+  s23:'"Lucida Handwriting",cursive',
+  s24:'"URW Chancery L",cursive',
+  s25:'"Vladimir Script",cursive',
+  s26:'"Kunstler Script",cursive',
+  s27:'"French Script MT",cursive',
+  s28:'"Bradley Hand",cursive',
+  s29:'"Rage Italic",cursive',
+  s30:'"Snell Roundhand",cursive'
+};
+
+function drawTyped(){
+  ctx.clearRect(0,0,sig.width,sig.height);
+  ctx.fillStyle='#fff';
+  ctx.fillRect(0,0,sig.width,sig.height);
+  ctx.fillStyle='#111827';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  
+  ctx.save();
+  ctx.translate(sig.width/2, sig.height/2);
+
+  // Apply procedural geometric skewing and scaling variations to break rigid computer text appearance
+  if(style==='s19'){ ctx.transform(1, 0, -0.24, 1, 0, 0); ctx.rotate(-0.07); }
+  else if(style==='s20'){ ctx.transform(1, 0, -0.32, 1.1, 0, 0); }
+  else if(style==='s21'){ ctx.transform(1, 0, -0.18, 1, 0, 0); ctx.rotate(-0.04); }
+  else if(style==='s22'){ ctx.transform(1, 0, -0.28, 1.05, 0, 0); }
+  else if(style==='s23'){ ctx.transform(1, 0, -0.21, 1, 0, 0); ctx.rotate(-0.09); }
+  else if(style==='s24'){ ctx.transform(1, 0, -0.36, 1, 0, 0); ctx.rotate(-0.05); }
+  else if(style==='s25'){ ctx.transform(1, 0, -0.26, 0.9, 0, 0); }
+  else if(style==='s26'){ ctx.transform(1, 0, -0.14, 1, 0, 0); ctx.rotate(-0.1); }
+  else if(style==='s27'){ ctx.transform(1, 0, -0.21, 0.95, 0, 0); }
+  else if(style==='s28'){ ctx.transform(1, 0, -0.24, 1, 0, 0); ctx.rotate(-0.03); }
+  else if(style==='s29'){ ctx.transform(1, 0, -0.39, 1.15, 0, 0); }
+  else if(style==='s30'){ ctx.transform(1, 0, -0.27, 1, 0, 0); ctx.rotate(-0.07); }
+  else { ctx.font=`italic ${sizeEl.value}px ${fonts[style]}`; }
+
+  if(style>='s19' && style<='s30'){
+    ctx.font=`italic ${sizeEl.value}px ${fonts[style]}`;
+  }
+
+  ctx.fillText(nameEl.value.trim()||'Your Name', 0, 0);
+  ctx.restore();
+}
+
+function sync(){
+  document.querySelectorAll('.style').forEach(x=>x.classList.toggle('active',x.dataset.style===style));
+}
+
+document.querySelectorAll('.style').forEach(x=>x.onclick=()=>{
+  style=x.dataset.style;
+  sync();
+  drawTyped();
+});
+
+nameEl.oninput=drawTyped;
+sizeEl.oninput=drawTyped;
+
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById(t.dataset.tab).classList.add('active');
+});
+
+document.getElementById('download').onclick=()=>{
+  const a=document.createElement('a');
+  a.download=(nameEl.value.trim()||'signature')+'.png';
+  a.href=sig.toDataURL('image/png');
+  a.click();
+};
+
+document.getElementById('copy').onclick=async()=>{
+  try{
+    const b=await new Promise(r=>sig.toBlob(r,'image/png'));
+    await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);
+    alert('PNG copied.');
+  }catch(e){
+    alert('Copy unavailable here. Use Download PNG.');
+  }
+};
+
+document.getElementById('clear').onclick=()=>{
+  nameEl.value='';
+  drawTyped();
+};
+
+function getSaved(){return JSON.parse(localStorage.getItem('sigV2')||'[]')}
+
+function renderSaved(){
+  const box=document.getElementById('savedList'),a=getSaved();
+  box.innerHTML=a.length?'':'<div class="hint">Nothing saved yet.</div>';
+  a.forEach((x,i)=>{
+    let r=document.createElement('div');
+    r.className='savedRow';
+    r.innerHTML='<div><div class="savedName">'+esc(x.name)+'</div><div class="hint">'+x.style+'</div></div>';
+    let b=document.createElement('button');
+    b.className='secondary';
+    b.textContent='Load';
+    b.onclick=()=>{
+      nameEl.value=x.name;
+      style=x.style;
+      sizeEl.value=x.size;
+      sync();
+      drawTyped();
+    };
+    let d=document.createElement('button');
+    d.className='danger';
+    d.textContent='×';
+    d.onclick=()=>{
+      a.splice(i,1);
+      localStorage.setItem('sigV2',JSON.stringify(a));
+      renderSaved();
+    };
+    let q=document.createElement('div');
+    q.style.display='flex';
+    q.style.gap='5px';
+    q.append(b,d);
+    r.append(q);
+    box.append(r);
+  });
+}
+
+function esc(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+
+document.getElementById('save').onclick=()=>{
+  if(!nameEl.value.trim())return alert('Enter a name first.');
+  let a=getSaved();
+  a.unshift({name:nameEl.value.trim(),style,size:Number(sizeEl.value)});
+  localStorage.setItem('sigV2',JSON.stringify(a.slice(0,30)));
+  renderSaved();
+};
+
+/* Freehand drawing */
+const dc=document.getElementById('drawCanvas'),dctx=dc.getContext('2d');
+dctx.lineCap='round';
+dctx.lineJoin='round';
+dctx.lineWidth=4;
+dctx.strokeStyle='#111827';
+
+dctx.fillStyle='#fff';
+dctx.fillRect(0,0,dc.width,dc.height);
+
+let drawing=false,last=null,history=[];
+
+function pos(e){
+  const r=dc.getBoundingClientRect();
+  return {
+    x:(e.clientX-r.left)*dc.width/r.width,
+    y:(e.clientY-r.top)*dc.height/r.height
+  };
+}
+
+function start(e){
+  drawing=true;
+  last=pos(e);
+  history.push(dctx.getImageData(0,0,dc.width,dc.height));
+  if(e.target.setPointerCapture) e.target.setPointerCapture(e.pointerId);
+  e.preventDefault();
+}
+
+function move(e){
+  if(!drawing)return;
+  const p=pos(e);
+  dctx.beginPath();
+  dctx.moveTo(last.x,last.y);
+  dctx.lineTo(p.x,p.y);
+  dctx.stroke();
+  last=p;
+  e.preventDefault();
+}
+
+function end(e){
+  if(drawing && e && e.target.releasePointerCapture){
+    try{ e.target.releasePointerCapture(e.pointerId); }catch(err){}
+  }
+  drawing=false;
+  last=null;
+}
+
+dc.addEventListener('pointerdown',start);
+dc.addEventListener('pointermove',move);
+dc.addEventListener('pointerup',end);
+dc.addEventListener('pointercancel',end);
+dc.addEventListener('pointerleave',end);
+
+document.getElementById('undo').onclick=()=>{
+  if(history.length){
+    dctx.putImageData(history.pop(),0,0);
+  }
+};
+
+document.getElementById('clearDrawn').onclick=()=>{
+  dctx.fillStyle='#fff';
+  dctx.fillRect(0,0,dc.width,dc.height);
+  history=[];
+};
+
+function transparentPNG(){
+  const c=document.createElement('canvas');
+  c.width=dc.width;
+  c.height=dc.height;
+  const x=c.getContext('2d');
+  x.drawImage(dc,0,0);
+  const im=x.getImageData(0,0,c.width,c.height),p=im.data;
+  for(let i=0;i<p.length;i+=4){
+    if(p[i]>245&&p[i+1]>245&&p[i+2]>245)p[i+3]=0;
+  }
+  x.putImageData(im,0,0);
+  return c;
+}
+
+document.getElementById('downloadDrawn').onclick=()=>{
+  const a=document.createElement('a');
+  a.download=(nameEl.value.trim()||'handwritten-signature')+'.png';
+  a.href=transparentPNG().toDataURL('image/png');
+  a.click();
+};
+
+document.getElementById('saveDrawn').onclick=()=>{
+  localStorage.setItem('drawnSignatureV2',dc.toDataURL('image/png'));
+  alert('Handwritten signature saved locally in this browser.');
+};
+
+drawTyped();
+renderSaved();
+</script>
+</body>
+</html>

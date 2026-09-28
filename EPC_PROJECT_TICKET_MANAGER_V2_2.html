@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EPC Project Ticket Manager V2</title>
+<style>
+:root{
+  --bg:#f5f7fb;
+  --panel:#ffffff;
+  --panel-soft:#f8fbff;
+  --text:#172033;
+  --muted:#64748b;
+  --border:#dbe4f0;
+  --accent:#16a34a;
+  --accent-soft:#dcfce7;
+  --danger:#ef4444;
+  --success:#22c55e;
+  --warning:#f59e0b;
+  --radius:22px;
+  --shadow:0 10px 30px rgba(148,163,184,.12);
+  --space-xs:6px;
+  --space-sm:12px;
+  --space-md:18px;
+  --space-lg:28px;
+  --space-xl:40px;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Inter,Segoe UI,sans-serif;
+  background:linear-gradient(180deg,#f8fbff,#f3f7fc);
+  color:var(--text);
+}
+
+.app-shell{
+  width:min(1600px,94vw);
+  margin:auto;
+  padding:28px;
+}
+
+.topbar{
+  display:grid;
+  grid-template-columns:1.3fr .7fr;
+  gap:22px;
+  margin-bottom:24px;
+}
+
+.hero,
+.clock-panel,
+.sidebar,
+.main-panel{
+  background:rgba(255,255,255,.92);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+
+.hero{
+  padding:30px;
+}
+
+.hero h1{
+  margin:0;
+  font-size:34px;
+}
+
+.hero p{
+  margin:12px 0 0;
+  color:var(--muted);
+  line-height:1.7;
+}
+
+.clock-panel{
+  padding:24px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+#clock{
+  font-size:54px;
+  font-weight:800;
+}
+
+#dateText{
+  color:var(--muted);
+  margin-top:8px;
+}
+
+#nextMeeting{
+  margin-top:18px;
+  background:var(--panel-soft);
+  border-radius:18px;
+  padding:16px;
+}
+
+.main-layout{
+  display:grid;
+  grid-template-columns:340px minmax(0,1fr);
+  gap:24px;
+}
+
+.sidebar,
+.main-panel{
+  padding:22px;
+}
+
+.section-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:18px;
+}
+
+.section-title h2{
+  margin:0;
+  font-size:18px;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:22px;
+}
+
+.stat-card{
+  background:var(--panel-soft);
+  border-radius:18px;
+  padding:18px;
+  border:1px solid var(--border);
+}
+
+.stat-value{
+  font-size:30px;
+  font-weight:800;
+}
+
+.stat-label{
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:18px;
+  margin-bottom:14px;
+}
+
+input,select,textarea,button{
+  width:100%;
+  border:none;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:12px 14px;
+  margin-top:10px;
+  font-size:14px;
+  font-family:inherit;
+}
+
+textarea{resize:vertical}
+
+button{
+  cursor:pointer;
+  background:linear-gradient(135deg,#16a34a,#22c55e);
+  color:white;
+  border:none;
+  font-weight:700;
+}
+
+button:hover{
+  opacity:.94;
+}
+
+.project-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:20px;
+}
+
+.project-chip{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:var(--accent-soft);
+  color:#166534;
+  padding:8px 12px;
+  border-radius:999px;
+  font-size:13px;
+}
+
+.project-chip span{
+  cursor:pointer;
+  font-weight:700;
+}
+
+.toolbar{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:20px;
+}
+
+.toolbar > *{
+  flex:1;
+  min-width:200px;
+}
+
+.kanban-board{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;
+}
+
+.column{
+  background:var(--panel-soft);
+  border-radius:22px;
+  padding:16px;
+  border:1px solid var(--border);
+  min-height:500px;
+}
+
+.column-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+}
+
+.column-header h3{
+  margin:0;
+}
+
+.badge{
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:700;
+}
+
+.todo{background:#fee2e2;color:#b91c1c}
+.progress{background:#dbeafe;color:#1d4ed8}
+.waiting{background:#fef3c7;color:#92400e}
+.done{background:#dcfce7;color:#166534}
+
+.task-title{
+  font-size:15px;
+  line-height:1.6;
+  font-weight:700;
+  margin-bottom:12px;
+}
+
+.meta{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+
+.tag{
+  background:#dcfce7;
+  color:#166534;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:11px;
+}
+
+.task-notes{
+  background:#f8fafc;
+  border-radius:14px;
+  padding:12px;
+  color:#475569;
+  font-size:13px;
+  margin-bottom:12px;
+  line-height:1.6;
+}
+
+.task-actions{
+  display:flex;
+  gap:10px;
+}
+
+.task-actions select{
+  flex:1;
+  margin-top:0;
+}
+
+.delete-btn{
+  width:auto;
+  background:#ef4444;
+  padding:10px 12px;
+}
+
+.meeting-card{
+  border-left:4px solid #16a34a;
+}
+
+summary{
+  cursor:pointer;
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:14px;
+}
+
+@media(max-width:1200px){
+  .topbar,
+  .main-layout{
+    grid-template-columns:1fr;
+  }
+}
+
+/* ===== V2 Ticket Manager ===== */
+label{display:block;font-size:11px;font-weight:800;color:#64748b;margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
+.form-grid{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:12px}.form-grid .full{grid-column:1/-1}
+.view-tabs{display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap}.view-tab{width:auto;background:#eef2f7;color:#334155;border:1px solid var(--border);padding:10px 16px;margin:0}.view-tab.active{background:#172033;color:#fff}
+.bulkbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}.bulkbar>div{margin-right:auto;color:#64748b}.secondary{width:auto;background:#eef2f7;color:#172033;border:1px solid var(--border);padding:10px 14px}
+.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:18px;background:#fff}.ticket-table{width:100%;border-collapse:collapse;min-width:1100px}.ticket-table th{background:#f8fafc;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:12px;border-bottom:1px solid var(--border)}.ticket-table td{padding:12px;border-bottom:1px solid #edf2f7;vertical-align:top;font-size:13px}.ticket-table tr:hover{background:#fbfdff}
+.ticket-id{font-weight:800;color:#64748b}.ticket-name{font-weight:800;line-height:1.45;min-width:250px}.subline{color:#64748b;font-size:11px;margin-top:5px}
+.urgency-pill,.status-pill{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:800;white-space:nowrap}.immediate-pill{background:#fee2e2;color:#b91c1c}.urgent-pill{background:#ffedd5;color:#c2410c}.normal-pill{background:#dbeafe;color:#1d4ed8}.planned-pill{background:#e2e8f0;color:#475569}
+.open-pill{background:#fee2e2;color:#b91c1c}.progress-pill{background:#dbeafe;color:#1d4ed8}.waiting-pill{background:#fef3c7;color:#92400e}.done-pill{background:#dcfce7;color:#166534}
+.row-actions{display:flex;gap:5px}.row-actions button{width:auto;padding:7px 9px;margin:0}.matrix-head{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:15px}.matrix-head h2{margin:0}.matrix-head p{color:#64748b;font-size:13px;margin:5px 0 0}
+.matrix{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.matrix-cell{min-height:230px;border-radius:20px;padding:16px;border:2px dashed var(--border);font-size:13px}.matrix-cell>b{display:block;font-size:16px;margin:5px 0}.matrix-cell>span{display:block;color:#64748b;font-size:11px;margin-bottom:12px}.matrix-cell.immediate{background:#fff7f7;border-color:#fecaca}.matrix-cell.urgent{background:#fffaf4;border-color:#fed7aa}.matrix-cell.normal{background:#f6faff;border-color:#bfdbfe}.matrix-cell.planned{background:#f8fafc;border-color:#cbd5e1}
+.matrix-items{display:flex;flex-direction:column;gap:7px}.matrix-ticket{background:#fff;border:1px solid var(--border);border-radius:12px;padding:9px;cursor:grab;box-shadow:0 3px 8px rgba(15,23,42,.05)}.matrix-ticket strong{display:block;font-size:12px}.matrix-ticket small{color:#64748b}
+@media(max-width:900px){.form-grid{grid-template-columns:1fr 1fr}.matrix{grid-template-columns:1fr}}@media(max-width:600px){.form-grid{grid-template-columns:1fr}.form-grid .full{grid-column:auto}}
+
+
+/* ===== V2.1 Production Hardening ===== */
+:root{--focus:#0f766e;--surface:#f8fafc}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid rgba(15,118,110,.28);outline-offset:2px}
+.app-status{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 16px;padding:10px 12px;border:1px solid var(--border);border-radius:14px;background:#fff;font-size:12px;color:var(--muted)}
+.save-state{font-weight:800}.save-ok{color:#166534}.save-warn{color:#92400e}.save-error{color:#b91c1c}
+.quick-filters{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px}
+.quick-filters button{width:auto;margin:0;padding:8px 11px;background:#f8fafc;color:#334155;border:1px solid var(--border);font-size:12px}
+.quick-filters button.active{background:#172033;color:#fff}
+.bulk-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 12px}
+.bulk-tools .selection-count{margin-right:auto;font-size:12px;color:var(--muted)}
+.ticket-table th:first-child,.ticket-table td:first-child{width:34px;text-align:center}
+.ticket-table input[type="checkbox"]{width:17px;height:17px;margin:0;accent-color:#16a34a}
+.ticket-table tr.selected{background:#f0fdf4}
+.matrix-legend{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px;font-size:11px;color:var(--muted)}
+.matrix-legend span{padding:5px 8px;border-radius:999px;background:#f8fafc;border:1px solid var(--border)}
+.activity-list{display:flex;flex-direction:column;gap:8px}.activity-item{padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:#fff;font-size:12px}.activity-item small{color:var(--muted)}
+.dep-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}.dep-chip{padding:5px 8px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:11px;font-weight:700}
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.38);display:none;align-items:center;justify-content:center;padding:20px;z-index:1000}
+.modal{width:min(860px,96vw);max-height:90vh;overflow:auto;background:#fff;border-radius:22px;border:1px solid var(--border);box-shadow:0 30px 80px rgba(15,23,42,.22);padding:22px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.modal-head h2{margin:0}
+.small-note{font-size:11px;color:var(--muted);line-height:1.5}
+@media(max-width:760px){.bulk-tools .selection-count{margin-right:0;width:100%}.app-status{align-items:flex-start;flex-direction:column}.matrix{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+<div class="topbar">
+  <div class="hero">
+    <h1 style="display:flex;align-items:center;gap:14px">
+<span style="display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:18px;background:#16a34a;color:#ffffff;font-size:30px;box-shadow:0 6px 18px rgba(34,197,94,.18)">
+⚡
+</span>
+<span>WAAREE EPC TICKET MANAGER — V2</span>
+</h1>
+    <p>
+      Ticket-based Engineering & EPC Work Planner • made by Akshay J Solanki
+    </p>
+  </div>
+
+  <div class="clock-panel">
+    <div id="clock">--:--:--</div>
+    <div id="dateText"></div>
+    <div id="nextMeeting">🌿 No upcoming meetings</div>
+    <div id="reminderBanner" style="display:none;margin-top:12px;background:#dcfce7;color:#166534;padding:12px 14px;border-radius:14px;font-size:13px;font-weight:600"></div>
+  </div>
+</div>
+
+
+<div class="main-layout">
+  <div class="sidebar">
+    <div class="section-title"><h2>◉ Overview</h2></div>
+    <div class="stats">
+      <div class="stat-card"><div class="stat-value" id="doneCount">0</div><div class="stat-label">Completed</div></div>
+      <div class="stat-card"><div class="stat-value" id="overdueCount">0</div><div class="stat-label">Overdue</div></div>
+      <div class="stat-card"><div class="stat-value" id="taskCount">0</div><div class="stat-label">Tickets</div></div>
+      <div class="stat-card"><div class="stat-value" id="urgentCount">0</div><div class="stat-label">Urgent / Immediate</div></div>
+    </div>
+
+    <div class="section-title"><h2>📁 Project Manager</h2></div>
+    <div class="card">
+      <div style="font-size:13px;color:#64748b;margin-bottom:10px">Create projects, packages, clients or workflows dynamically.</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <input type="text" id="newProject" placeholder="Hydrogen Plant / Valve Skid / Client Review" style="flex:1;margin-top:0">
+        <button onclick="addProject()" style="width:auto;min-width:140px">✚ Add Project</button>
+      </div>
+    </div>
+    <div class="project-tags" id="projectTags"></div>
+
+    <div class="section-title"><h2>📅 Meetings</h2></div>
+    <div id="meetingList"></div>
+    <div class="card">
+      <input type="text" id="meetingTitle" placeholder="Meeting title">
+      <input type="date" id="meetingDate">
+      <input type="time" id="meetingTime">
+      <textarea id="meetingNotes" rows="3" placeholder="Meeting notes"></textarea>
+      <button onclick="addMeeting()">Add Meeting</button>
+    </div>
+  </div>
+
+  <div class="main-panel">
+    <div class="toolbar">
+      <select id="projectFilter" onchange="refreshViews()"></select>
+      <select id="statusFilter" onchange="refreshViews()">
+        <option value="all">All Statuses</option><option>Open</option><option>In Progress</option><option>Waiting</option><option>Done</option>
+      </select>
+      <select id="urgencyFilter" onchange="refreshViews()">
+        <option value="all">All Urgency</option><option>Immediate</option><option>Urgent</option><option>Normal</option><option>Planned</option>
+      </select>
+      <select id="disciplineFilter" onchange="refreshViews()"><option value="all">All Disciplines</option></select>
+      <input type="text" id="searchBox" placeholder="Search ticket, owner, discipline, project, notes..." oninput="refreshViews()">
+      <button onclick="exportCSV()">⬇ CSV</button><button onclick="exportBackup()">⬇ Backup</button>
+      <button onclick="importBackup()">⬆ Import</button>
+    </div>
+
+    
+<div class="app-status">
+  <span>💾 <span id="saveState" class="save-state save-ok">All changes saved</span></span>
+  <span>•</span>
+  <span id="lastSavedText">Not saved yet</span>
+  <span>•</span>
+  <span><b>V2.1</b> Production Hardened</span><span>•</span><span>👤 <b id="currentUserLabel">Local User</b> <button class="secondary" style="width:auto;padding:5px 8px;margin:0 0 0 4px" onclick="changeCurrentUser()">Change</button></span>
+</div>
+
+<div class="quick-filters">
+  <button onclick="applyQuickFilter('all',this)">All</button>
+  <button onclick="applyQuickFilter('my',this)">👤 My Tasks</button>
+  <button onclick="applyQuickFilter('overdue',this)">🔴 Overdue</button>
+  <button onclick="applyQuickFilter('urgent',this)">🔥 Immediate/Urgent</button>
+  <button onclick="applyQuickFilter('open',this)">📂 Open</button>
+  <button onclick="applyQuickFilter('blocked',this)">⛔ Waiting</button>
+</div>
+
+<div class="view-tabs">
+
+      <button class="view-tab active" onclick="setView('tickets',this)">🎫 Ticket List</button>
+      <button class="view-tab" onclick="setView('matrix',this)">🚦 Urgency Matrix</button>
+      <button class="view-tab" onclick="setView('board',this)">📋 Status Board</button>
+      <button class="view-tab" onclick="setView('closed',this)">🗄 Closed / History</button>
+    </div>
+
+    <section id="ticketsView">
+      <div class="bulkbar">
+        <div><strong id="visibleCount">0</strong> tickets visible</div>
+        <button class="secondary" onclick="openTicketForm()">✚ New Ticket</button>
+        <button class="secondary" onclick="addTenTickets()">✚ Add 10 Tickets</button>
+      </div>
+      
+<div class="bulk-tools">
+  <span class="selection-count"><b id="selectionCount">0</b> selected</span>
+  <button class="secondary" onclick="bulkAssign()">👤 Assign</button>
+  <button class="secondary" onclick="bulkDiscipline()">🧩 Discipline</button>
+  <button class="secondary" onclick="bulkUrgency()">🔥 Urgency</button>
+  <button class="secondary" onclick="bulkStatus()">🚦 Status</button>
+  <button class="secondary" onclick="bulkDueDate()">📅 Due Date</button>
+  <button class="secondary" onclick="bulkDelete()">🗑 Delete</button>
+</div>
+<div class="table-wrap">
+        <table class="ticket-table">
+          <thead><tr><th><input type="checkbox" id="selectAllTickets" title="Select all visible tickets" onchange="toggleAllVisible(this.checked)"></th><th>ID</th><th>Ticket / Action</th><th>Project</th><th>Discipline</th><th>Responsible Person</th><th>Urgency</th><th>Status</th><th>Due</th><th>Actions</th></tr></thead>
+          <tbody id="ticketTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="matrixView" style="display:none">
+      <div class="matrix-head">
+        <div><h2>Urgency / Importance Matrix</h2><p>Drag a ticket into another zone to change urgency and importance.</p></div>
+        <button class="secondary" onclick="openTicketForm()">✚ New Ticket</button>
+      </div>
+      
+<div class="matrix-legend">
+  <span>🔥 Immediate</span><span>⚡ Urgent</span><span>⏱ Normal</span><span>📅 Planned</span>
+  <span>High importance</span><span>Low importance</span>
+</div>
+<div class="matrix">
+  <div class="matrix-cell immediate" data-urgency="Immediate" data-importance="High" ondragover="allowDrop(event)" ondrop="dropMatrix(event)">🔥 <b>DO NOW</b><span>Immediate + High</span><div class="matrix-items"></div></div>
+  <div class="matrix-cell immediate" data-urgency="Immediate" data-importance="Low" ondragover="allowDrop(event)" ondrop="dropMatrix(event)">🚨 <b>INTERRUPT</b><span>Immediate + Low</span><div class="matrix-items"></div></div>
+  <div class="matrix-cell urgent" data-urgency="Urgent" data-importance="High" ondragover="allowDrop(event)" ondrop="dropMatrix(event)">⚡ <b>URGENT</b><span>Urgent + High</span><div class="matrix-items"></div></div>
+  <div class="matrix-cell urgent" data-urgency="Urgent" data-importance="Low" ondragover="allowDrop(event)" ondrop="dropMatrix(event)">⏱️ <b>HANDLE SOON</b><span>Urgent + Low</span><div class="matrix-items"></div></div>
+  <div class="matrix-cell normal" data-urgency="Normal" data-importance="High" ondragover="allowDrop(event)" ondrop="dropMatrix(event)">🎯 <b>FOCUS</b><span>Normal + High</span><div class="matrix-items"></div></div>
+  <div class="matrix-cell normal" data-urgency="Normal" data-importance="Low" ondragover="allowDrop(event)" ondrop="dropMatrix(event)">🗂️ <b>QUEUE</b><span>Normal + Low</span><div class="matrix-items"></div></div>
+  <div class="matrix-cell planned" data-urgency="Planned" data-importance="High" ondragover="allowDrop(event)" ondrop="dropMatrix(event)">📅 <b>PLAN</b><span>Planned + High</span><div class="matrix-items"></div></div>
+  <div class="matrix-cell planned" data-urgency="Planned" data-importance="Low" ondragover="allowDrop(event)" ondrop="dropMatrix(event)">📝 <b>BACKLOG</b><span>Planned + Low</span><div class="matrix-items"></div></div>
+</div>
+</section>
+
+    <section id="boardView" style="display:none">
+      <div class="kanban-board">
+        <div class="column"><div class="column-header"><h3>Open</h3><span class="badge todo">Queue</span></div><div id="openCol"></div></div>
+        <div class="column"><div class="column-header"><h3>In Progress</h3><span class="badge progress">Running</span></div><div id="progressCol"></div></div>
+        <div class="column"><div class="column-header"><h3>Waiting</h3><span class="badge waiting">Blocked</span></div><div id="waitingCol"></div></div>
+        <div class="column"><div class="column-header"><h3>Done</h3><span class="badge done">Complete</span></div><div id="doneCol"></div></div>
+      </div>
+    </section>
+
+    <section id="closedView" style="display:none">
+      <div class="matrix-head">
+        <div><h2>🗄 Closed Tickets & Full History</h2><p>Every completed ticket, with its complete audit trail — who changed what, and exactly when.</p></div>
+      </div>
+      <div class="stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
+        <div class="stat-card"><div class="stat-value" id="closedCount">0</div><div class="stat-label">Closed tickets</div></div>
+        <div class="stat-card"><div class="stat-value" id="closedAvgDays">0</div><div class="stat-label">Avg. days open→closed</div></div>
+        <div class="stat-card"><div class="stat-value" id="closedThisMonth">0</div><div class="stat-label">Closed this month</div></div>
+      </div>
+      <div class="bulkbar">
+        <input type="text" id="closedSearch" placeholder="🔎 Search closed tickets (title, project, owner, reference)..." oninput="renderClosed()" style="margin:0;max-width:360px">
+        <select id="closedProjectFilter" onchange="renderClosed()" style="margin:0;max-width:220px"></select>
+        <button class="secondary" onclick="exportClosedCSV()">⬇ Export Closed CSV</button>
+      </div>
+      <div id="closedList" style="margin-top:16px"></div>
+    </section>
+
+    <details id="ticketDetails" open style="margin-top:24px">
+      <summary><span style="color:#16a34a;font-weight:900">✚</span> Add / Edit Ticket</summary>
+      <div class="card ticket-form">
+        <input type="hidden" id="editTicketId">
+        <div class="form-grid">
+          <div class="full"><label>Ticket / Action</label><input type="text" id="ticketTitle" placeholder="Review MS valve skid GA drawing comments"></div>
+          <div><label>Project</label><select id="ticketProject"></select></div>
+          <div><label>Discipline</label><input type="text" id="ticketDiscipline" list="disciplineList" placeholder="Piping / Process / Mechanical..."><datalist id="disciplineList"></datalist><datalist id="peopleList"></datalist></div>
+          <div><label>Responsible Person</label><input type="text" id="ticketOwner" list="peopleList" placeholder="Person responsible"></div>
+          <div><label>Accountable Person</label><input type="text" id="ticketAccountable" list="peopleList" placeholder="Engineering Manager / Lead"></div>
+          <div><label>Supporting Person / Team</label><input type="text" id="ticketSupport" list="peopleList" placeholder="Who else is involved?"></div>
+          <div><label>Consulted</label><input type="text" id="ticketConsulted" placeholder="Consulted discipline/person"></div>
+          <div><label>Informed</label><input type="text" id="ticketInformed" placeholder="People to keep informed"></div>
+          <div><label>Urgency</label><select id="ticketUrgency"><option>Immediate</option><option>Urgent</option><option selected>Normal</option><option>Planned</option></select></div>
+          <div><label>Importance</label><select id="ticketImportance"><option selected>High</option><option>Low</option></select></div>
+          <div><label>Status</label><select id="ticketStatus"><option>Open</option><option>In Progress</option><option>Waiting</option><option>Done</option></select></div>
+          <div><label>Assigned Date</label><input type="date" id="ticketAssigned"></div>
+          <div><label>Due Date</label><input type="date" id="ticketDue"></div>
+          <div><label>Reference / Document No.</label><input type="text" id="ticketReference" placeholder="Drawing / spec / email / transmittal no."></div>
+          <div><label>Client / Vendor</label><input type="text" id="ticketExternal" placeholder="Optional external party"></div>
+          <div><label>Depends On (Ticket IDs)</label><input type="text" id="ticketDependencies" placeholder="EPC-00012, EPC-00019"></div>
+          <div><label>Category</label><select id="ticketCategory"><option>Engineering Action</option><option>Drawing Review</option><option>Vendor Action</option><option>Client Action</option><option>Procurement</option><option>Site Action</option><option>Meeting Action</option><option>Other</option></select></div>
+          <div class="full"><label>Details / Notes / Blocker / Next Action</label><textarea id="ticketNotes" rows="5" placeholder="Detailed engineering context, dependency, action required, response expected..."></textarea></div>
+          <div class="full"><div class="small-note">Structured dependencies are ticket IDs separated by commas. Example: EPC-00012, EPC-00019.</div></div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+          <button class="secondary" onclick="clearTicketForm()">Clear</button><button onclick="saveTicket()">Save Ticket</button>
+        </div>
+      </div>
+    </details>
+  
+<div class="card" style="margin-top:14px">
+  <div class="section-title" style="margin-bottom:8px">
+    <h2>📜 Ticket Activity</h2>
+    <button class="secondary" style="width:auto" onclick="showSelectedActivity()">View Selected Ticket History</button>
+  </div>
+  <div class="small-note">Every create, edit, assignment, priority, status and due-date change is recorded locally for audit traceability.</div>
+  <div id="activityPreview" style="margin-top:12px"></div>
+</div>
+
+<div id="activityModal" class="modal-backdrop" onclick="closeActivityModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head"><h2 id="activityModalTitle">Ticket History</h2><button class="secondary" style="width:auto" onclick="closeActivityModal()">✕</button></div>
+    <div id="activityModalBody" class="activity-list"></div>
+  </div>
+</div>
+
+</div>
+</div>
+</div>
+
+<script>
+/* ==========================================================
+   EPC PROJECT TICKET MANAGER V2.1
+   Production-hardening layer:
+   - Explicit DOM references
+   - Versioned schema + migration
+   - Safe persistence and import validation
+   - Complete 4x2 urgency/importance matrix
+   - Bulk operations
+   - Activity/audit history
+   - Responsibility model
+   - Quick filters
+   - Offline operation without CDN dependencies
+   ========================================================== */
+
+'use strict';
+
+const $ = id => document.getElementById(id);
+const el = {
+  clock:$('clock'), dateText:$('dateText'), nextMeeting:$('nextMeeting'),
+  reminderBanner:$('reminderBanner'), projectTags:$('projectTags'),
+  projectFilter:$('projectFilter'), ticketProject:$('ticketProject'),
+  disciplineFilter:$('disciplineFilter'), disciplineList:$('disciplineList'),
+  peopleList:$('peopleList'), meetingList:$('meetingList'),
+  taskCount:$('taskCount'), doneCount:$('doneCount'), overdueCount:$('overdueCount'),
+  urgentCount:$('urgentCount'), visibleCount:$('visibleCount'),
+  selectionCount:$('selectionCount'), saveState:$('saveState'), lastSavedText:$('lastSavedText'),
+  ticketTableBody:$('ticketTableBody'), selectAll:$('selectAllTickets'),
+  projectFilter2:$('projectFilter'), statusFilter:$('statusFilter'),
+  urgencyFilter:$('urgencyFilter'), searchBox:$('searchBox'),
+  ticketDetails:$('ticketDetails'), activityPreview:$('activityPreview'),
+  activityModal:$('activityModal'), activityModalTitle:$('activityModalTitle'), activityModalBody:$('activityModalBody')
+};
+
+const SCHEMA_VERSION = 3;
+const STORAGE = {projects:'plannerProjects',tasks:'plannerTasks',meetings:'plannerMeetings',meta:'plannerMeta'};
+const defaultProjects=['General','Hydrogen Plant','Procurement','Client Review'];
+const defaultTasks=[{
+  id:1,title:'Review hydrogen piping comments',project:'Hydrogen Plant',discipline:'Piping',
+  owner:'',accountable:'',support:'Process',consulted:'',informed:'',
+  urgency:'Urgent',importance:'High',priority:'Urgent',status:'In Progress',
+  category:'Engineering Action',assigned:'2026-05-19',due:'2026-05-25',
+  reference:'',external:'',dependencies:'',notes:'Coordinate with process and piping discipline before issue.',
+  createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),activity:[]
+}];
+const disciplines=['Process','Piping','Mechanical','Civil','Structural','Electrical','Instrumentation','Procurement','QA/QC','Project Management','HSE','Client','Vendor','Other'];
+const categories=['Engineering Action','Drawing Review','Vendor Action','Client Action','Procurement','Site Action','Meeting Action','Other'];
+
+let state={projects:[],tasks:[],meetings:[],meta:{}};
+let nextId=1;
+let selectedTicketIds=new Set();
+let quickFilter='all';
+
+function todayISO(){
+  return new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().split('T')[0];
+}
+function nowISO(){return new Date().toISOString()}
+function uid(prefix='EPC'){
+  return prefix+'-'+String(nextId++).padStart(5,'0');
+}
+function esc(v){
+  return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function safeParse(raw){
+  try{return JSON.parse(raw)}catch{return null}
+}
+function normaliseTask(t,index=0){
+  const status=t?.status==='To Do'?'Open':(t?.status||'Open');
+  const urgency=t?.urgency||t?.priority||'Normal';
+  return {
+    id:t?.id ?? uid(),
+    title:String(t?.title||`Imported Ticket ${index+1}`),
+    project:String(t?.project||'General'),
+    discipline:String(t?.discipline||''),
+    owner:String(t?.owner||''),
+    accountable:String(t?.accountable||''),
+    support:String(t?.support||''),
+    consulted:String(t?.consulted||''),
+    informed:String(t?.informed||''),
+    urgency:['Immediate','Urgent','Normal','Planned'].includes(urgency)?urgency:'Normal',
+    importance:['High','Low'].includes(t?.importance)?t.importance:'High',
+    priority:urgency,
+    status:['Open','In Progress','Waiting','Done'].includes(status)?status:'Open',
+    category:categories.includes(t?.category)?t.category:'Engineering Action',
+    assigned:String(t?.assigned||''),
+    due:String(t?.due||''),
+    reference:String(t?.reference||''),
+    external:String(t?.external||''),
+    dependencies:String(t?.dependencies||''),
+    notes:String(t?.notes||''),
+    createdAt:t?.createdAt||nowISO(),
+    updatedAt:t?.updatedAt||nowISO(),
+    completedAt:t?.completedAt||'',
+    activity:Array.isArray(t?.activity)?t.activity:[]
+  };
+}
+function defaultState(){
+  return {projects:[...defaultProjects],tasks:[...defaultTasks.map(normaliseTask)],meetings:[],meta:{schemaVersion:SCHEMA_VERSION,currentUser:'',lastSaved:''}};
+}
+function loadState(){
+  let projects=safeParse(localStorage.getItem(STORAGE.projects));
+  let tasks=safeParse(localStorage.getItem(STORAGE.tasks));
+  let meetings=safeParse(localStorage.getItem(STORAGE.meetings));
+  const meta=safeParse(localStorage.getItem(STORAGE.meta))||{};
+  if(!Array.isArray(projects)||!projects.length)projects=[...defaultProjects];
+  if(!Array.isArray(tasks))tasks=[...defaultTasks];
+  if(!Array.isArray(meetings))meetings=[];
+  state={projects, tasks:tasks.map(normaliseTask), meetings, meta:{...meta,schemaVersion:SCHEMA_VERSION,currentUser:String(meta.currentUser||'')}};
+  nextId=Math.max(1,...state.tasks.map(t=>typeof t.id==='number'?t.id:0))+1;
+  migrateLegacyState();
+}
+function migrateLegacyState(){
+  state.tasks=state.tasks.map(t=>{
+    t.status=t.status==='To Do'?'Open':t.status||'Open';
+    t.urgency=t.urgency||t.priority||'Normal';
+    t.importance=t.importance||'High';
+    t.priority=t.urgency;
+    if(!Array.isArray(t.activity))t.activity=[];
+    return t;
+  });
+}
+function setSaveState(kind,message){
+  el.saveState.className='save-state '+(kind==='ok'?'save-ok':kind==='warn'?'save-warn':'save-error');
+  el.saveState.textContent=message;
+}
+function saveAll(){
+  const payload={schemaVersion:SCHEMA_VERSION,savedAt:nowISO()};
+  try{
+    localStorage.setItem(STORAGE.projects,JSON.stringify(state.projects));
+    localStorage.setItem(STORAGE.tasks,JSON.stringify(state.tasks));
+    localStorage.setItem(STORAGE.meetings,JSON.stringify(state.meetings));
+    localStorage.setItem(STORAGE.meta,JSON.stringify({...payload,currentUser:state.meta.currentUser||''}));
+    state.meta.lastSaved=payload.savedAt;
+    setSaveState('ok','All changes saved');
+    el.lastSavedText.textContent=`Saved ${new Date(payload.savedAt).toLocaleTimeString('en-IN',{hour12:false})}`;
+    return true;
+  }catch(err){
+    console.error(err);
+    setSaveState('error','Storage failed — export a backup now');
+    el.lastSavedText.textContent='Browser storage rejected the latest change';
+    alert('The browser could not save the latest change. Please export a backup immediately.');
+    return false;
+  }
+}
+function addActivity(t,action,detail=''){
+  if(!Array.isArray(t.activity))t.activity=[];
+  t.activity.unshift({at:nowISO(),by:state.meta.currentUser||'Local User',action,detail});
+  t.activity=t.activity.slice(0,100);
+  t.updatedAt=nowISO();
+}
+function findTask(id){return state.tasks.find(t=>String(t.id)===String(id))}
+function ensureCurrentUser(){
+  if(!state.meta.currentUser){
+    const v=prompt('Set your name for ticket accountability and activity history:');
+    if(v&&v.trim()){state.meta.currentUser=v.trim();saveAll();}
+  }
+}
+function updateClock(){
+  const n=new Date();
+  el.clock.textContent=n.toLocaleTimeString('en-IN',{hour12:false});
+  el.dateText.textContent=n.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+function updateNextMeeting(){
+  const n=new Date(),u=state.meetings.map(m=>({...m,d:new Date(`${m.date}T${m.time}`)})).filter(m=>m.d>n).sort((a,b)=>a.d-b.d);
+  if(!u.length){el.nextMeeting.innerHTML='🌿 No upcoming meetings';return}
+  const x=u[0],q=Math.floor((x.d-n)/1000),h=Math.floor(q/3600),m=Math.floor(q%3600/60),s=q%60;
+  el.nextMeeting.innerHTML=`<div style="font-size:13px;color:#64748b">Next Meeting</div><div style="font-size:17px;font-weight:700;margin-top:4px">${esc(x.title)}</div><div style="margin-top:8px;color:#16a34a">⏳ ${h}h ${m}m ${s}s</div>`;
+}
+function reminderEngine(){
+  setInterval(()=>{
+    const n=new Date();
+    state.meetings.forEach(m=>{
+      const d=new Date(`${m.date}T${m.time}`),diff=Math.floor((d-n)/60000),key=`meeting-${m.id}`;
+      if(diff<=30&&diff>=29&&!sessionStorage.getItem(key)){
+        sessionStorage.setItem(key,'1');
+        if('Notification'in window && Notification.permission==='granted')new Notification('Meeting Reminder',{body:`${m.title} starts in 30 minutes.`});
+      }
+    });
+  },30000);
+}
+function requestNotifications(){
+  try{
+    if('Notification'in window && window.isSecureContext && Notification.permission==='default')Notification.requestPermission().catch(()=>{});
+  }catch{}
+}
+
+
+function changeCurrentUser(){
+  const v=prompt('Enter your name:',state.meta.currentUser||'');if(v===null)return;
+  state.meta.currentUser=v.trim();saveAll();renderMasterLists();renderTickets();refreshViews();
+  $('currentUserLabel').textContent=state.meta.currentUser||'Local User';
+}
+function renderProjects(){
+  const currentP=el.projectFilter.value,currentTP=el.ticketProject.value;
+  el.projectTags.innerHTML='';
+  el.projectFilter.innerHTML='<option value="all">All Projects</option>';
+  el.ticketProject.innerHTML='';
+  state.projects.forEach((p,i)=>{
+    el.projectTags.insertAdjacentHTML('beforeend',`<div class="project-chip">📁 ${esc(p)} <span onclick="removeProject(${i})">×</span></div>`);
+    el.projectFilter.insertAdjacentHTML('beforeend',`<option value="${esc(p)}">${esc(p)}</option>`);
+    el.ticketProject.insertAdjacentHTML('beforeend',`<option value="${esc(p)}">${esc(p)}</option>`);
+  });
+  if(state.projects.includes(currentTP))el.ticketProject.value=currentTP;
+  else if(state.projects.length)el.ticketProject.value=state.projects[0];
+  if([...el.projectFilter.options].some(o=>o.value===currentP))el.projectFilter.value=currentP;
+  else el.projectFilter.value='all';
+  const cpf=$('closedProjectFilter');
+  if(cpf){const cur=cpf.value;cpf.innerHTML='<option value="all">All Projects</option>'+state.projects.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');cpf.dataset.built='1';if([...cpf.options].some(o=>o.value===cur))cpf.value=cur}
+  renderMasterLists();
+}
+function renderMasterLists(){
+  const ds=[...new Set([...disciplines,...state.tasks.map(t=>t.discipline).filter(Boolean)])].sort();
+  const people=[...new Set([state.meta.currentUser,...state.tasks.flatMap(t=>[t.owner,t.accountable,t.support]).filter(Boolean)])].sort();
+  el.disciplineFilter.innerHTML='<option value="all">All Disciplines</option>'+ds.map(x=>`<option>${esc(x)}</option>`).join('');
+  el.disciplineList.innerHTML=ds.map(x=>`<option value="${esc(x)}">`).join('');
+  el.peopleList.innerHTML=people.map(x=>`<option value="${esc(x)}">`).join('');
+}
+function addProject(){
+  const i=$('newProject'),v=i.value.trim();if(!v)return;
+  if(state.projects.includes(v))return alert('Project already exists');
+  state.projects.push(v);i.value='';saveAll();renderProjects();el.ticketProject.value=v;
+}
+function removeProject(i){
+  const p=state.projects[i];
+  if(state.tasks.some(t=>t.project===p))return alert('Project is used by tickets. Reassign those tickets first.');
+  if(!confirm(`Delete project "${p}"?`))return;
+  state.projects.splice(i,1);saveAll();renderProjects();refreshViews();
+}
+
+function clearTicketForm(){
+  ['editTicketId','ticketTitle','ticketDiscipline','ticketOwner','ticketAccountable','ticketSupport','ticketConsulted','ticketInformed','ticketReference','ticketExternal','ticketDependencies','ticketNotes','ticketDue'].forEach(id=>$(id).value='');
+  $('ticketAssigned').value=todayISO();$('ticketUrgency').value='Normal';$('ticketImportance').value='High';$('ticketStatus').value='Open';$('ticketCategory').value='Engineering Action';
+  el.ticketProject.value=state.projects[0]||'';
+}
+function editTicket(id){
+  const t=findTask(id);if(!t)return;
+  $('editTicketId').value=t.id;
+  $('ticketTitle').value=t.title||'';
+  el.ticketProject.value=state.projects.includes(t.project)?t.project:(state.projects[0]||'');
+  $('ticketDiscipline').value=t.discipline||'';
+  $('ticketOwner').value=t.owner||'';
+  $('ticketAccountable').value=t.accountable||'';
+  $('ticketSupport').value=t.support||'';
+  $('ticketConsulted').value=t.consulted||'';
+  $('ticketInformed').value=t.informed||'';
+  $('ticketUrgency').value=t.urgency||t.priority||'Normal';
+  $('ticketImportance').value=t.importance||'High';
+  $('ticketStatus').value=t.status||'Open';
+  $('ticketAssigned').value=t.assigned||todayISO();
+  $('ticketDue').value=t.due||'';
+  $('ticketReference').value=t.reference||'';
+  $('ticketExternal').value=t.external||'';
+  $('ticketDependencies').value=t.dependencies||'';
+  $('ticketCategory').value=categories.includes(t.category)?t.category:'Engineering Action';
+  $('ticketNotes').value=t.notes||'';
+}
+function openTicketForm(id=null){
+  if(id!==null)editTicket(id);else clearTicketForm();
+  el.ticketDetails.open=true; $('ticketTitle').focus();
+  el.ticketDetails.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function duplicateTask(id){
+  const src=findTask(id);if(!src)return;
+  const copy={...src,id:uid(),title:src.title+' (copy)',status:'Open',completedAt:'',createdAt:nowISO(),updatedAt:nowISO(),activity:[]};
+  addActivity(copy,'Ticket created',`Duplicated from ${src.id} by ${state.meta.currentUser||'Local User'}`);
+  state.tasks.push(copy);saveAll();refreshViews();
+}
+function reopenTask(id){
+  const t=findTask(id);if(!t)return;
+  if(!confirm(`Reopen ${t.id}: ${t.title}?`))return;
+  const old=t.status;t.status='Open';t.completedAt='';
+  addActivity(t,'Ticket reopened',`${old} → Open`);saveAll();refreshViews();
+}
+function saveTicket(){
+  const title=$('ticketTitle').value.trim();if(!title)return alert('Enter ticket / action');
+  const rawId=$('editTicketId').value;
+  const existing=rawId?findTask(rawId):null;
+  const id=existing?existing.id:uid();
+  const t={
+    id,title,project:el.ticketProject.value||'General',discipline:$('ticketDiscipline').value.trim(),
+    owner:$('ticketOwner').value.trim(),accountable:$('ticketAccountable').value.trim(),support:$('ticketSupport').value.trim(),
+    consulted:$('ticketConsulted').value.trim(),informed:$('ticketInformed').value.trim(),
+    urgency:$('ticketUrgency').value,importance:$('ticketImportance').value,priority:$('ticketUrgency').value,
+    status:$('ticketStatus').value,category:$('ticketCategory').value,assigned:$('ticketAssigned').value,due:$('ticketDue').value,
+    reference:$('ticketReference').value.trim(),external:$('ticketExternal').value.trim(),dependencies:$('ticketDependencies').value.trim(),
+    notes:$('ticketNotes').value.trim(),createdAt:existing?.createdAt||nowISO(),updatedAt:nowISO(),completedAt:existing?.completedAt||'',activity:existing?.activity||[]
+  };
+  if(existing){
+    const changed=[];
+    [['Owner','owner'],['Accountable','accountable'],['Discipline','discipline'],['Urgency','urgency'],['Importance','importance'],['Status','status'],['Due','due'],['Project','project'],['Responsible Support','support']].forEach(([label,k])=>{if(String(existing[k]||'')!==String(t[k]||''))changed.push(`${label}: ${existing[k]||'—'} → ${t[k]||'—'}`)});
+    Object.assign(existing,t);addActivity(existing,'Ticket updated',changed.join(' | ')||'Details edited');
+    if(t.status==='Done'&&!existing.completedAt)existing.completedAt=nowISO();
+  }else{addActivity(t,'Ticket created',`Created by ${state.meta.currentUser||'Local User'}`);state.tasks.push(t)}
+  saveAll();renderProjects();refreshViews();clearTicketForm();renderActivityPreview();
+}
+function deleteTask(id){
+  const t=findTask(id);if(!t)return;
+  if(!confirm(`Delete ${t.id}: ${t.title}?`))return;
+  state.tasks=state.tasks.filter(x=>String(x.id)!==String(id));selectedTicketIds.delete(id);saveAll();refreshViews();
+}
+function moveTask(id,status){
+  const t=findTask(id);if(!t)return;
+  const old=t.status;t.status=status;
+  if(status==='Done'&&!t.completedAt)t.completedAt=nowISO();if(status!=='Done')t.completedAt='';
+  addActivity(t,'Status changed',`${old} → ${status}`);saveAll();refreshViews();
+}
+function toggleTicketSelection(id,on){if(on)selectedTicketIds.add(id);else selectedTicketIds.delete(id);updateSelectionUI()}
+function toggleAllVisible(on){filteredTasks().forEach(t=>on?selectedTicketIds.add(t.id):selectedTicketIds.delete(t.id));refreshViews()}
+function updateSelectionUI(){
+  el.selectionCount.textContent=selectedTicketIds.size;
+  const boxes=[...document.querySelectorAll('.ticket-select')];
+  boxes.forEach(b=>{b.checked=selectedTicketIds.has(Number(b.dataset.id));b.closest('tr')?.classList.toggle('selected',b.checked)});
+  if(el.selectAll)el.selectAll.checked=boxes.length>0&&boxes.every(b=>b.checked);
+}
+function selectedTasks(){return state.tasks.filter(t=>selectedTicketIds.has(t.id))}
+function bulkRequire(){const ts=selectedTasks();if(!ts.length){alert('Select one or more tickets first.');return null}return ts}
+function bulkAssign(){const ts=bulkRequire();if(!ts)return;const v=prompt('Assign responsible person to selected tickets:',state.meta.currentUser||'');if(v===null)return;ts.forEach(t=>{const old=t.owner;t.owner=v.trim();addActivity(t,'Bulk assignment',`${old||'Unassigned'} → ${t.owner||'Unassigned'}`)});saveAll();renderProjects();refreshViews()}
+function bulkDiscipline(){const ts=bulkRequire();if(!ts)return;const v=prompt('Discipline for selected tickets (Piping / Process / Mechanical / etc.):');if(v===null)return;ts.forEach(t=>{const old=t.discipline;t.discipline=v.trim();addActivity(t,'Bulk discipline change',`${old||'—'} → ${t.discipline||'—'}`)});saveAll();renderProjects();refreshViews()}
+function bulkUrgency(){const ts=bulkRequire();if(!ts)return;const v=prompt('Urgency: Immediate / Urgent / Normal / Planned','Urgent');if(v===null||!['Immediate','Urgent','Normal','Planned'].includes(v))return alert('Invalid urgency');ts.forEach(t=>{const old=t.urgency;t.urgency=v;t.priority=v;addActivity(t,'Bulk urgency change',`${old} → ${v}`)});saveAll();refreshViews()}
+function bulkStatus(){const ts=bulkRequire();if(!ts)return;const v=prompt('Status: Open / In Progress / Waiting / Done','In Progress');if(v===null||!['Open','In Progress','Waiting','Done'].includes(v))return alert('Invalid status');ts.forEach(t=>{const old=t.status;t.status=v;if(v==='Done'&&!t.completedAt)t.completedAt=nowISO();addActivity(t,'Bulk status change',`${old} → ${v}`)});saveAll();refreshViews()}
+function bulkDueDate(){const ts=bulkRequire();if(!ts)return;const v=prompt('Due date YYYY-MM-DD (leave blank to clear):',todayISO());if(v===null)return;if(v&&!/^\d{4}-\d{2}-\d{2}$/.test(v))return alert('Use YYYY-MM-DD');ts.forEach(t=>{const old=t.due;t.due=v;addActivity(t,'Bulk due-date change',`${old||'—'} → ${v||'—'}`)});saveAll();refreshViews()}
+function bulkDelete(){const ts=bulkRequire();if(!ts)return;if(!confirm(`Delete ${ts.length} selected tickets?`))return;const ids=new Set(ts.map(t=>t.id));state.tasks=state.tasks.filter(t=>!ids.has(t.id));selectedTicketIds.clear();saveAll();refreshViews()}
+
+function applyQuickFilter(type,btn){
+  quickFilter=type;document.querySelectorAll('.quick-filters button').forEach(b=>b.classList.remove('active'));btn?.classList.add('active');refreshViews();
+}
+function filteredTasks(){
+  const pf=el.projectFilter.value,s=el.searchBox.value.toLowerCase().trim(),sf=$('statusFilter').value,uf=$('urgencyFilter').value,df=el.disciplineFilter.value,me=(state.meta.currentUser||'').toLowerCase();
+  return state.tasks.filter(t=>{
+    const base=(pf==='all'||t.project===pf)&&(sf==='all'||t.status===sf)&&(uf==='all'||(t.urgency||t.priority)===uf)&&(df==='all'||t.discipline===df)&&(!s||[t.title,t.project,t.discipline,t.owner,t.accountable,t.support,t.reference,t.external,t.notes,t.category].some(v=>String(v||'').toLowerCase().includes(s)));
+    const overdue=t.due&&new Date(t.due+'T23:59:59')<new Date()&&t.status!=='Done';
+    if(quickFilter==='my')return base&&me&&(String(t.owner||'').toLowerCase()===me);
+    if(quickFilter==='overdue')return base&&overdue;
+    if(quickFilter==='urgent')return base&&['Immediate','Urgent'].includes(t.urgency||t.priority)&&t.status!=='Done';
+    if(quickFilter==='open')return base&&t.status!=='Done';
+    if(quickFilter==='blocked')return base&&t.status==='Waiting';
+    return base;
+  });
+}
+function renderTickets(){
+  const items=filteredTasks();el.ticketTableBody.innerHTML='';
+  items.forEach(t=>{
+    const tr=document.createElement('tr'),overdue=t.due&&new Date(t.due+'T23:59:59')<new Date()&&t.status!=='Done';
+    tr.innerHTML=`<td><input type="checkbox" class="ticket-select" data-id="${esc(t.id)}" onchange="toggleTicketSelection(${JSON.stringify(t.id)},this.checked)" ${selectedTicketIds.has(t.id)?'checked':''}></td>
+      <td class="ticket-id">${esc(t.id)}</td>
+      <td><div class="ticket-name">${esc(t.title)}</div><div class="subline">${t.reference?'Ref: '+esc(t.reference):''}${t.external?' · '+esc(t.external):''}</div>${t.notes?`<div class="subline">📝 ${esc(t.notes.slice(0,120))}${t.notes.length>120?'…':''}</div>`:''}</td>
+      <td>${esc(t.project||'—')}</td><td>${esc(t.discipline||'—')}</td>
+      <td><b>${esc(t.owner||'Unassigned')}</b>${t.accountable?`<div class="subline">A: ${esc(t.accountable)}</div>`:''}${t.support?`<div class="subline">S: ${esc(t.support)}</div>`:''}</td>
+      <td>${pill('urgency',t.urgency||t.priority)}</td><td>${pill('status',t.status)}</td>
+      <td>${t.due?`<span style="${overdue?'color:#dc2626;font-weight:800':''}">${esc(t.due)}${overdue?' · OVERDUE':''}</span>`:'—'}</td>
+      <td><div class="row-actions"><button class="secondary" title="Edit" onclick='openTicketForm(${JSON.stringify(t.id)})'>✏</button><button class="secondary" title="Full history" onclick='showActivity(${JSON.stringify(t.id)})'>📜</button><button class="secondary" title="Duplicate" onclick='duplicateTask(${JSON.stringify(t.id)})'>📄</button><button class="secondary" title="Delete" onclick='deleteTask(${JSON.stringify(t.id)})'>🗑</button></div></td>`;
+    el.ticketTableBody.appendChild(tr);
+  });
+  el.visibleCount.textContent=items.length;el.taskCount.textContent=state.tasks.length;
+  el.doneCount.textContent=state.tasks.filter(t=>t.status==='Done').length;
+  el.urgentCount.textContent=state.tasks.filter(t=>['Immediate','Urgent'].includes(t.urgency||t.priority)&&t.status!=='Done').length;
+  el.overdueCount.textContent=state.tasks.filter(t=>t.due&&new Date(t.due+'T23:59:59')<new Date()&&t.status!=='Done').length;
+  updateSelectionUI();renderActivityPreview();
+}
+function pill(type,v){const c=String(v||'').toLowerCase().replace(/\s+/g,'-');return `<span class="${type}-pill ${c}-pill">${esc(v||'—')}</span>`}
+
+function renderMatrix(){
+  document.querySelectorAll('.matrix-items').forEach(x=>x.innerHTML='');
+  filteredTasks().forEach(t=>{
+    const u=t.urgency||t.priority||'Normal',imp=t.importance||'High';
+    const cell=[...document.querySelectorAll('.matrix-cell')].find(x=>x.dataset.urgency===u&&x.dataset.importance===imp);
+    if(!cell)return;
+    const d=document.createElement('div');d.className='matrix-ticket';d.draggable=true;
+    d.ondragstart=e=>e.dataTransfer.setData('text/plain',String(t.id));d.ondblclick=()=>openTicketForm(t.id);
+    d.innerHTML=`<strong>${esc(t.id)} · ${esc(t.title)}</strong><small>${esc(t.owner||'Unassigned')} · ${esc(t.discipline||'No discipline')}</small>`;
+    cell.querySelector('.matrix-items').appendChild(d);
+  });
+  const missing=filteredTasks().filter(t=>!['Immediate','Urgent','Normal','Planned'].includes(t.urgency||t.priority)||!['High','Low'].includes(t.importance||'High')).length;
+  if(missing)console.warn('Matrix unmapped tickets:',missing);
+}
+function allowDrop(e){e.preventDefault()}
+function dropMatrix(e){
+  e.preventDefault();
+  const id=e.dataTransfer.getData('text/plain'),t=findTask(id),c=e.currentTarget;if(!t)return;
+  const oldU=t.urgency,oldI=t.importance;t.urgency=c.dataset.urgency;t.priority=t.urgency;t.importance=c.dataset.importance;
+  addActivity(t,'Matrix move',`${oldU}/${oldI} → ${t.urgency}/${t.importance}`);saveAll();refreshViews();
+}
+function renderBoard(){
+  const c={Open:$('openCol'),'In Progress':$('progressCol'),Waiting:$('waitingCol'),Done:$('doneCol')};Object.values(c).forEach(x=>x.innerHTML='');
+  filteredTasks().forEach(t=>{
+    const d=document.createElement('div');d.className='card';
+    d.innerHTML=`<div class="task-title">🎫 ${esc(t.id)} · ${esc(t.title)}</div><div class="meta"><span class="tag">📁 ${esc(t.project||'')}</span><span class="tag">👤 ${esc(t.owner||'Unassigned')}</span><span class="tag">🧩 ${esc(t.discipline||'')}</span>${pill('urgency',t.urgency||t.priority)}</div>${t.notes?`<div class="task-notes">📝 ${esc(t.notes)}</div>`:''}<div class="task-actions"><select onchange='moveTask(${JSON.stringify(t.id)},this.value)'>${['Open','In Progress','Waiting','Done'].map(s=>`<option ${t.status===s?'selected':''}>${s}</option>`).join('')}</select><button class="secondary" style="width:auto" onclick='openTicketForm(${JSON.stringify(t.id)})'>✏</button></div>`;
+    c[t.status]?.appendChild(d);
+  });
+}
+function refreshViews(){renderTickets();renderMatrix();renderBoard();renderClosed()}
+
+let currentView='tickets';
+function setView(view,btn){
+  currentView=view;
+  document.querySelectorAll('.view-tab').forEach(b=>b.classList.remove('active'));
+  btn?.classList.add('active');
+  ['tickets','matrix','board','closed'].forEach(v=>{
+    const s=$(v+'View');if(s)s.style.display=(v===view)?'':'none';
+  });
+  if(view==='closed')renderClosed();
+}
+
+function daysBetween(a,b){return Math.round((new Date(b)-new Date(a))/86400000)}
+function renderClosed(){
+  const listEl=$('closedList');if(!listEl)return;
+  const projSel=$('closedProjectFilter');
+  if(projSel && !projSel.dataset.built){
+    projSel.innerHTML='<option value="all">All Projects</option>'+state.projects.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
+    projSel.dataset.built='1';
+  }
+  const s=($('closedSearch')?.value||'').toLowerCase().trim();
+  const pf=$('closedProjectFilter')?.value||'all';
+  const closed=state.tasks.filter(t=>t.status==='Done')
+    .filter(t=>pf==='all'||t.project===pf)
+    .filter(t=>!s||[t.title,t.project,t.discipline,t.owner,t.reference,t.notes].some(v=>String(v||'').toLowerCase().includes(s)))
+    .sort((a,b)=>new Date(b.completedAt||b.updatedAt||0)-new Date(a.completedAt||a.updatedAt||0));
+
+  $('closedCount').textContent=state.tasks.filter(t=>t.status==='Done').length;
+  const durations=state.tasks.filter(t=>t.status==='Done'&&t.completedAt&&t.createdAt).map(t=>daysBetween(t.createdAt,t.completedAt));
+  $('closedAvgDays').textContent=durations.length?Math.round(durations.reduce((a,b)=>a+b,0)/durations.length):'—';
+  const now=new Date();
+  $('closedThisMonth').textContent=state.tasks.filter(t=>t.status==='Done'&&t.completedAt&&new Date(t.completedAt).getMonth()===now.getMonth()&&new Date(t.completedAt).getFullYear()===now.getFullYear()).length;
+
+  if(!closed.length){listEl.innerHTML='<div class="small-note">No closed tickets match this filter yet.</div>';return}
+  listEl.innerHTML=closed.map(t=>{
+    const opened=t.createdAt?new Date(t.createdAt).toLocaleString('en-IN'):'—';
+    const closedAt=t.completedAt?new Date(t.completedAt).toLocaleString('en-IN'):'—';
+    const dur=(t.completedAt&&t.createdAt)?daysBetween(t.createdAt,t.completedAt)+' day(s) open':'';
+    const history=(t.activity||[]).slice().reverse().map(a=>`<div class="activity-item"><b>${esc(a.action)}</b><div>${esc(a.detail||'')}</div><small>${new Date(a.at).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'})} · ${esc(a.by||'Local User')}</small></div>`).join('')||'<div class="small-note">No activity recorded.</div>';
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>
+          <div class="ticket-name">✅ ${esc(t.id)} · ${esc(t.title)}</div>
+          <div class="subline">${esc(t.project||'—')} · ${esc(t.discipline||'—')} · Owner: ${esc(t.owner||'Unassigned')}${t.reference?' · Ref: '+esc(t.reference):''}</div>
+          <div class="subline">Opened: ${opened} &nbsp;→&nbsp; Closed: ${closedAt} ${dur?'· '+dur:''}</div>
+          ${t.notes?`<div class="subline">📝 ${esc(t.notes)}</div>`:''}
+        </div>
+        <div class="row-actions" style="align-items:flex-start">
+          <button class="secondary" onclick='openTicketForm(${JSON.stringify(t.id)})'>✏ Edit</button>
+          <button class="secondary" onclick='reopenTask(${JSON.stringify(t.id)})'>↩ Reopen</button>
+        </div>
+      </div>
+      <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700;color:#334155">📜 Full history (${(t.activity||[]).length} entries)</summary><div class="activity-list" style="margin-top:8px">${history}</div></details>
+    </div>`;
+  }).join('');
+}
+let _downloadsNS=null;
+async function getDownloads(){
+  if(_downloadsNS)return _downloadsNS;
+  try{if(window.claude&&window.claude.use)_downloadsNS=await window.claude.use('downloads')}catch{_downloadsNS=null}
+  return _downloadsNS;
+}
+async function saveFile(filename,blob,opts){
+  const dl=await getDownloads();
+  if(dl){
+    try{await dl.save({filename,data:blob});return true}
+    catch(err){
+      if(err&&err.code==='declined')return false;
+      console.warn('downloads.save failed, falling back to link:',err);
+    }
+  }
+  // Chrome/Edge: let the user pick the exact folder + filename via a native Save dialog.
+  // Only usable when called from a real click (browser blocks it otherwise) — so silent/auto
+  // saves (opts.silent) skip straight to the plain download fallback below.
+  if(!opts?.silent && window.showSaveFilePicker){
+    try{
+      const ext='.'+filename.split('.').pop();
+      const handle=await window.showSaveFilePicker({
+        suggestedName:filename,
+        types:[{description:ext.toUpperCase()+' file',accept:{[blob.type||'application/octet-stream']:[ext]}}]
+      });
+      const writable=await handle.createWritable();
+      await writable.write(blob);await writable.close();
+      return true;
+    }catch(err){
+      if(err&&err.name==='AbortError')return false; // user cancelled the dialog
+      console.warn('showSaveFilePicker failed, falling back to plain download:',err);
+    }
+  }
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  return true;
+}
+function exportClosedCSV(){
+  const rows=state.tasks.filter(t=>t.status==='Done');
+  if(!rows.length)return alert('No closed tickets to export.');
+  const headers=['Ticket ID','Title','Project','Discipline','Responsible','Created At','Completed At','Days Open','Reference','Notes'];
+  const out=[headers,...rows.map(t=>[t.id,t.title,t.project,t.discipline,t.owner,t.createdAt,t.completedAt,(t.completedAt&&t.createdAt)?daysBetween(t.createdAt,t.completedAt):'',t.reference,t.notes])];
+  const csv='\ufeff'+out.map(r=>r.map(csvCell).join(',')).join('\r\n');
+  saveFile(`epc_closed_tickets_${todayISO()}.csv`,new Blob([csv],{type:'text/csv;charset=utf-8'}));
+}
+
+function showActivity(id){
+  const t=findTask(id);if(!t)return;
+  el.activityModalTitle.textContent=`History — ${t.id} · ${t.title}`;
+  el.activityModalBody.innerHTML=t.activity?.length?t.activity.map(a=>`<div class="activity-item"><b>${esc(a.action)}</b><div>${esc(a.detail||'')}</div><small>${new Date(a.at).toLocaleString('en-IN')} · ${esc(a.by||'Local User')}</small></div>`).join(''):'<div class="small-note">No activity recorded.</div>';
+  el.activityModal.style.display='flex';
+}
+function showSelectedActivity(){
+  const ids=[...selectedTicketIds];if(ids.length!==1)return alert('Select exactly one ticket to view its history.');
+  showActivity(ids[0]);
+}
+function closeActivityModal(e){if(!e||e.target===el.activityModal)el.activityModal.style.display='none'}
+function renderActivityPreview(){
+  const t=selectedTicketIds.size===1?findTask([...selectedTicketIds][0]):null;
+  if(!t){el.activityPreview.innerHTML='<div class="small-note">Select exactly one ticket to preview its recent history.</div>';return}
+  el.activityPreview.innerHTML=(t.activity||[]).slice(0,5).map(a=>`<div class="activity-item"><b>${esc(a.action)}</b> — ${esc(a.detail||'')}<br><small>${new Date(a.at).toLocaleString('en-IN')} · ${esc(a.by||'Local User')}</small></div>`).join('')||'<div class="small-note">No activity recorded.</div>';
+}
+
+function renderMeetings(){
+  el.meetingList.innerHTML='';
+  state.meetings.forEach(m=>{
+    const d=document.createElement('div');d.className='card meeting-card';
+    d.innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px"><div><div style="font-weight:700">⏰ ${esc(m.title)}</div><div style="margin-top:6px;color:#64748b">${esc(m.date)} • ${esc(m.time)}</div>${m.notes?`<div class="task-notes" style="margin-top:10px">${esc(m.notes)}</div>`:''}</div><button class="delete-btn" onclick='deleteMeeting(${JSON.stringify(m.id)})'>✕</button></div>`;
+    el.meetingList.appendChild(d);
+  });
+}
+function addMeeting(){
+  const title=$('meetingTitle').value.trim(),date=$('meetingDate').value,time=$('meetingTime').value;
+  if(!title||!date||!time)return alert('Fill all meeting details');
+  state.meetings.push({id:Date.now(),title,date,time,notes:$('meetingNotes').value.trim()});$('meetingTitle').value='';$('meetingNotes').value='';$('meetingTime').value='';
+  saveAll();renderMeetings();updateNextMeeting();
+}
+function deleteMeeting(id){if(!confirm('Delete this meeting?'))return;state.meetings=state.meetings.filter(m=>String(m.id)!==String(id));saveAll();renderMeetings();updateNextMeeting()}
+
+function validateBackup(data){
+  if(!data||typeof data!=='object')return {ok:false,error:'Backup is not an object.'};
+  if(!Array.isArray(data.projects)||!Array.isArray(data.tasks)||!Array.isArray(data.meetings))return {ok:false,error:'Backup must contain projects, tasks and meetings arrays.'};
+  for(let i=0;i<data.tasks.length;i++){const t=data.tasks[i];if(!t||typeof t!=='object'||!('title'in t))return {ok:false,error:`Ticket ${i+1} is malformed.`}}
+  return {ok:true};
+}
+
+function csvCell(v){const s=String(v??'');return `"${s.replace(/"/g,'""')}"`}
+function exportCSV(){
+  const rows=filteredTasks();
+  const headers=['Ticket ID','Title','Project','Discipline','Responsible','Accountable','Support','Urgency','Importance','Status','Category','Assigned','Due','Reference','Client/Vendor','Dependencies','Notes'];
+  const out=[headers,...rows.map(t=>[t.id,t.title,t.project,t.discipline,t.owner,t.accountable,t.support,t.urgency,t.importance,t.status,t.category,t.assigned,t.due,t.reference,t.external,t.dependencies,t.notes])];
+  const csv='\ufeff'+out.map(r=>r.map(csvCell).join(',')).join('\r\n');
+  saveFile(`epc_tickets_${todayISO()}.csv`,new Blob([csv],{type:'text/csv;charset=utf-8'}));
+}
+
+function exportBackup(silent){
+  const data={schemaVersion:SCHEMA_VERSION,exportedAt:nowISO(),currentUser:state.meta.currentUser||'',projects:state.projects,tasks:state.tasks,meetings:state.meetings};
+  saveFile(`epc_project_ticket_manager_v2.1_${todayISO()}.json`,new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),{silent:!!silent});
+  state.meta.lastBackupAt=nowISO();saveAll();checkBackupReminder();
+}
+// Auto-backup: 60s after every fresh page load, drop a silent JSON backup (default Downloads
+// folder — browsers won't allow a save-location prompt without a click). Skips if there's
+// nothing to back up yet, and won't fire twice in the same tab session.
+let _autoBackupDone=false;
+setTimeout(()=>{
+  if(_autoBackupDone)return;_autoBackupDone=true;
+  if(!state.tasks.length&&!state.projects.length&&!state.meetings.length)return;
+  exportBackup(true);
+  console.info('Auto-backup: silently saved a JSON backup to your Downloads folder (60s after load).');
+},60000);
+function checkBackupReminder(){
+  if(!el.reminderBanner)return;
+  const last=state.meta.lastBackupAt;
+  if(!last){
+    el.reminderBanner.style.cssText='margin-top:12px;background:#fef3c7;color:#92400e;padding:12px 14px;border-radius:14px;font-size:13px;font-weight:600;display:block';
+    el.reminderBanner.innerHTML=`⚠️ You've never exported a backup. Everything here lives only in this browser — a cache clear would wipe it. <button class="secondary" style="width:auto;display:inline;margin:0 0 0 8px;padding:6px 12px" onclick="exportBackup()">Export backup now</button>`;
+    return;
+  }
+  const days=daysBetween(last,nowISO());
+  if(days>=3){
+    el.reminderBanner.style.cssText='margin-top:12px;background:#fef3c7;color:#92400e;padding:12px 14px;border-radius:14px;font-size:13px;font-weight:600;display:block';
+    el.reminderBanner.innerHTML=`⚠️ Last backup was ${days} day(s) ago (${new Date(last).toLocaleDateString('en-IN')}). <button class="secondary" style="width:auto;display:inline;margin:0 0 0 8px;padding:6px 12px" onclick="exportBackup()">Export backup now</button>`;
+  }else{
+    el.reminderBanner.style.cssText='margin-top:12px;background:#dcfce7;color:#166534;padding:12px 14px;border-radius:14px;font-size:13px;font-weight:600;display:block';
+    el.reminderBanner.innerHTML=`✅ Backed up ${days===0?'today':days+' day(s) ago'} (${new Date(last).toLocaleDateString('en-IN')}).`;
+  }
+}
+function importBackup(){
+  const i=document.createElement('input');i.type='file';i.accept='.json';
+  i.onchange=e=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onerror=()=>alert('Could not read the selected backup file.');
+    r.onload=x=>{
+      const d=safeParse(x.target.result),v=validateBackup(d);if(!v.ok)return alert(`Import rejected: ${v.error}`);
+      const preview=`Projects: ${d.projects.length}\nTickets: ${d.tasks.length}\nMeetings: ${d.meetings.length}\nSchema: ${d.schemaVersion||'legacy'}\n\nReplace current data with this backup?`;
+      if(!confirm(preview))return;
+      state.projects=d.projects.map(String).filter(Boolean);
+      state.tasks=d.tasks.map(normaliseTask);
+      state.meetings=d.meetings.map(m=>({...m}));
+      state.meta.currentUser=String(d.currentUser||state.meta.currentUser||'');
+      nextId=Math.max(1,...state.tasks.map(t=>typeof t.id==='number'?t.id:0))+1;
+      if(saveAll()){selectedTicketIds.clear();state.meta.lastBackupAt=nowISO();saveAll();renderProjects();refreshViews();renderMeetings();updateNextMeeting();checkBackupReminder();alert('Backup imported and validated successfully.')}
+    };
+    r.readAsText(f);
+  };i.click();
+}
+
+/* Initialise */
+loadState();
+$('currentUserLabel').textContent=state.meta.currentUser||'Local User';
+renderProjects();
+renderMeetings();
+refreshViews();
+$('meetingDate').value=todayISO();
+$('ticketAssigned').value=todayISO();
+updateClock();
+updateNextMeeting();
+renderActivityPreview();
+checkBackupReminder();
+requestNotifications();
+setInterval(()=>{updateClock();updateNextMeeting()},1000);
+reminderEngine();
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.activeElement?.id==='newProject')addProject();
+  if(e.key==='Escape')el.activityModal.style.display='none';
+});
+</script>
+</body>
+</html>
